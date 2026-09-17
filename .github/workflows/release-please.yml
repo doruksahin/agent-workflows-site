@@ -1,0 +1,65 @@
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-please-main
+  cancel-in-progress: false
+
+jobs:
+  verify-main:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/verify.yml
+
+  release:
+    needs: verify-main
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      pr_sha: ${{ steps.resolve-pr.outputs.sha }}
+    steps:
+      - name: Prepare a release PR or publish a merged release
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ github.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+      - name: Resolve the release PR's exact commit
+        id: resolve-pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_PR_NUMBER: ${{ steps.release.outputs.pr && fromJSON(steps.release.outputs.pr).number || '' }}
+        run: |
+          # An unchanged pending PR produces no action output on retries.
+          if [ -z "$RELEASE_PR_NUMBER" ]; then
+            RELEASE_PR_NUMBER="$(gh api "repos/$GITHUB_REPOSITORY/pulls?state=open&base=main&per_page=100" --jq '
+              [.[] | select(.head.repo.full_name == .base.repo.full_name)
+               | select(any(.labels[]; .name == "autorelease: pending"))]
+              | if length > 1 then error("Multiple pending release PRs; select one before retrying")
+                elif length == 1 then .[0].number else empty end')"
+          fi
+          if [ -z "$RELEASE_PR_NUMBER" ]; then
+            exit 0
+          fi
+          release_pr_sha="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$RELEASE_PR_NUMBER" --jq '.head.sha')"
+          echo "sha=$release_pr_sha" >> "$GITHUB_OUTPUT"
+
+  # Do not depend on GITHUB_TOKEN-created PRs starting unattended PR workflows.
+  # Run the same checks explicitly, in a separate job with read-only permissions.
+  verify-release-pr:
+    needs: release
+    if: ${{ needs.release.outputs.pr_sha != '' }}
+    uses: ./.github/workflows/verify.yml
+    with:
+      ref: ${{ needs.release.outputs.pr_sha }}
