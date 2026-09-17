@@ -14,7 +14,7 @@ for(const tool of tools){
  for(const related of tool.related) assert.ok(slugs.has(related),'Unknown related tool: '+related);
 }
 let links=0;
-const files=walk(root).filter(p=>p.endsWith('.html')&&!p.includes('/maps/'));
+const files=walk(root).filter(p=>p.endsWith('.html')&&!p.includes('/maps/')&&!p.includes('/downloads/'));
 for(const file of files){
  const html=readFileSync(file,'utf8');
  assert.ok(html.includes('<title>'),'Missing page title: '+file);
@@ -32,6 +32,7 @@ for(const file of files){
 const manifest=JSON.parse(readFileSync('content/maps/provenance.json','utf8'));
 const hash=createHash('sha256').update(readFileSync(manifest.html)).digest('hex');
 assert.equal(hash,manifest.sha256,'Map differs from reviewed artifact');
+assert.equal(createHash('sha256').update(readFileSync('dist/downloads/agent-workflows.html')).digest('hex'),manifest.sha256,'Download differs from original map');
 const authored=[...walk('src'),...walk('content')].filter(p=>/\.(json|md|astro)$/.test(p));
 for(const file of authored) assert.ok(!readFileSync(file,'utf8').includes('/Users/'),'Personal filesystem path in '+file);
 console.log('Verified '+files.length+' pages, '+links+' local links, '+tools.length+' source records, and the standalone map checksum.');
