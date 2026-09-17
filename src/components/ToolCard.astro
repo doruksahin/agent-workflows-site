@@ -1,0 +1,13 @@
+---
+import ToolMark from './ToolMark.astro';
+const {tool:t}=Astro.props;
+const source='https://github.com/'+t.repo;
+const pin=source+'/blob/'+t.commit+'/'+(t.path?t.path+'/':'');
+---
+<article class="repo-card">
+  <div class="repo-card-top"><ToolMark slug={t.slug} /><span class="eyebrow">{t.kind}</span></div>
+  <h3><a href={'/tools/'+t.slug+'/'}>{t.name}</a></h3>
+  <p class="repo-description">{t.summary}</p>
+  <a class="repo-address" href={source}><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M8 4H4v16h16V8M10 4h10v10M20 4 9 15" fill="none" stroke="currentColor" stroke-width="1.6"/></svg><span>{t.repo}{t.path && <small>/{t.path}</small>}</span><span aria-hidden="true">↗</span></a>
+  <details class="card-disclosure"><summary>Inputs, outputs & source<span aria-hidden="true">+</span></summary><div class="card-reveal"><div class="mini-io"><span>IN</span><p>{t.input}</p><span>OUT</span><p>{t.output}</p></div><div class="file-links">{t.files.map(file=><a href={pin+file}>{file} ↗</a>)}</div><p class="reference-note">Source at {t.commit.slice(0,7)} · {t.public?'Public repository':'Private repository; access required'}</p><a class="text-link" href={'/tools/'+t.slug+'/'}>Explore this tool →</a></div></details>
+</article>

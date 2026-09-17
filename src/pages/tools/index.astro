@@ -1,6 +1,13 @@
 ---
 import Base from '../../layouts/Base.astro';
 import tools from '../../data/tools.json';
+import ToolCard from '../../components/ToolCard.astro';
 const groups=[...new Set(tools.map(t=>t.group))];
 ---
-<Base title="The tool catalog" description="Find the right tool across ten agent workflow components, with inputs, outputs, boundaries, and source references."><div class="shell"><div class="page-head"><div class="eyebrow">The catalog / 10 components</div><h1>A place for<br /><em>every tool.</em></h1><p class="lead">Start with the responsibility. Each entry explains when to use the tool, what goes in, what comes out, and where to read the source.</p><p class="small">Some components have private source repositories. Their explanations are public; source links require access.</p></div>{groups.map(group=><section class="catalog-group"><h2>{group}<span>{tools.filter(t=>t.group===group).length.toString().padStart(2,'0')}</span></h2>{tools.filter(t=>t.group===group).map(t=><a class="tool-row" href={'/tools/'+t.slug+'/'}><h3>{t.name}</h3><p>{t.summary}</p><span class:list={['badge',{'private':!t.public}]}>{t.public?'Public source':'Private source'}</span><span class="arrow" aria-hidden="true">↗</span></a>)}</section>)}</div></Base>
+<Base title="Tools & repositories" description="Explore the tools visually, open their GitHub repositories, and reveal inputs, outputs, and exact source references.">
+<div class="shell">
+  <div class="page-head"><div class="eyebrow">10 components / 9 repositories</div><h1>Find the tool.<br /><em>Follow the source.</em></h1><p class="lead">A quick overview first. Open a tool’s details when you need the handoffs, instructions, or source behind it.</p></div>
+  <nav class="group-nav" aria-label="Tool categories">{groups.map((group,i)=><a href={'#group-'+i}>{group}</a>)}<a href="/map/">Explore the map ↗</a></nav>
+  <div id="repositories">{groups.map((group,i)=><section class="catalog-group" id={'group-'+i}><h2>{group}<span>{tools.filter(t=>t.group===group).length.toString().padStart(2,'0')}</span></h2><div class="repo-grid">{tools.filter(t=>t.group===group).map(t=><ToolCard tool={t}/>)}</div></section>)}</div>
+</div>
+</Base>

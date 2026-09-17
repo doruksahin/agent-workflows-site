@@ -1,8 +1,28 @@
 ---
 import Base from '../../layouts/Base.astro';
 import tools from '../../data/tools.json';
+import ToolMark from '../../components/ToolMark.astro';
 export function getStaticPaths(){return tools.map(tool=>({params:{slug:tool.slug},props:{tool}}))}
 const {tool:t}=Astro.props;
-const base='https://github.com/'+t.repo+'/blob/'+t.commit+'/'+(t.path?t.path+'/':'');
+const repo='https://github.com/'+t.repo;
+const base=repo+'/blob/'+t.commit+'/'+(t.path?t.path+'/':'');
 ---
-<Base title={t.name} description={t.summary}><div class="shell"><div class="page-head"><div class="breadcrumb"><a href="/tools/">Tools</a> / {t.group}</div><div class="eyebrow">{t.kind}</div><h1>{t.name}</h1><p class="lead">{t.summary}</p></div><div class="detail"><article class="prose"><h2>When to reach for it</h2><p>{t.when}</p><div class="inout"><div><h3>Input</h3><p>{t.input}</p></div><div><h3>Output</h3><p>{t.output}</p></div></div><h2>What happens</h2><p>{t.how}</p><h2>Where its responsibility ends</h2><p>{t.boundary}</p><h2>Get started</h2><p>{t.start}</p><p><a href={base+t.files[0]}>Read the owner’s instructions ↗</a>{!t.public && <small> — repository access required</small>}</p><h2>Connected tools</h2><ul>{t.related.map(slug=>{const item=tools.find(x=>x.slug===slug)!;return <li><a href={'/tools/'+slug+'/'}>{item.name}</a> — {item.summary}</li>})}</ul></article><aside class="source-box" aria-label="Source references"><div class:list={['badge',{'private':!t.public}]}>{t.public?'Public source':'Private source'}</div><h2 style="margin-top:20px">Follow the source</h2><p>{t.repo}</p>{t.files.map(file=><a class="source-file" href={base+file}>{(t.path?t.path+'/':'')+file} ↗</a>)}<hr/><p>Reviewed snapshot</p><a class="commit" href={'https://github.com/'+t.repo+'/commit/'+t.commit}>{t.commit.slice(0,12)} ↗</a><p>Checked 17 September 2026 against the workspace’s recorded source revision.</p>{!t.public && <p>These source links require repository access. No installation access is granted by this guide.</p>}<a class="text-link" href="/about/">How references work →</a></aside></div></div></Base>
+<Base title={t.name} description={t.summary}>
+<div class="shell">
+  <div class="page-head tool-head"><div class="breadcrumb"><a href="/tools/">Tools & repos</a> / {t.group}</div><div class="tool-title"><ToolMark slug={t.slug}/><span class="eyebrow">{t.kind}</span></div><h1>{t.name}</h1><p class="lead">{t.summary}</p><div class="actions"><a class="button" href={repo}>Open GitHub repository ↗</a><a class="text-link" href={base+t.files[0]}>Read the source guide ↗</a></div><a class="repo-label" href={repo}>{t.repo}{t.path?' / '+t.path:''}</a></div>
+  <section class="operation-flow" aria-label={t.name+' input, operation, and output'}>
+    <div><span class="eyebrow">01 / Input</span><p>{t.input}</p></div><span class="operation-arrow" aria-hidden="true">→</span>
+    <div class="operation-owner"><ToolMark slug={t.slug}/><h2>{t.name}</h2><span>{t.kind}</span></div><span class="operation-arrow" aria-hidden="true">→</span>
+    <div><span class="eyebrow">02 / Output</span><p>{t.output}</p></div>
+  </section>
+  <div class="detail">
+    <article class="prose"><h2>When to reach for it</h2><p>{t.when}</p>
+      <details class="explanation" open><summary>How it works<span aria-hidden="true">+</span></summary><div><p>{t.how}</p><a class="text-link" href={base+t.files[0]}>Trace this to the source ↗</a></div></details>
+      <details class="explanation"><summary>Where its responsibility ends<span aria-hidden="true">+</span></summary><div><p>{t.boundary}</p></div></details>
+      <details class="explanation"><summary>Setup & first use<span aria-hidden="true">+</span></summary><div><p>{t.start}</p><a class="text-link" href={base+(t.files.find((f:string)=>/installation|cli|playbook|portable/.test(f))||t.files[0])}>Open the owner’s instructions ↗</a></div></details>
+      <details class="explanation"><summary>Exact files & reviewed version<span aria-hidden="true">+</span></summary><div><p>This explanation follows the recorded source snapshot reviewed on 17 September 2026.</p><div class="file-links">{t.files.map((file:string)=><a href={base+file}>{(t.path?t.path+'/':'')+file} ↗</a>)}</div><p><a href={repo+'/commit/'+t.commit}><code>{t.commit}</code> ↗</a></p><p class="reference-note">{t.public?'Public repository.':'Private repository; sign in with an account that has access.'}</p></div></details>
+    </article>
+    <aside class="connections-panel"><div class="eyebrow">Explore the connections</div><h2>Related components</h2><div class="connection-list">{t.related.map((slug:string)=>{const item=tools.find(x=>x.slug===slug)!;return <div><a class="connection-tool" href={'/tools/'+slug+'/'}><ToolMark slug={slug}/><span>{item.name}</span><span aria-hidden="true">→</span></a><a class="connection-source" href={'https://github.com/'+item.repo}>{item.repo} ↗</a></div>})}</div><a class="text-link" href="/map/">See the full system map ↗</a></aside>
+  </div>
+</div>
+</Base>

@@ -1,0 +1,10 @@
+---
+const {compact=false}=Astro.props;
+const steps=[
+ {n:'01',name:'Freeze the task',tool:'Jira to Packet',href:'/tools/jira-to-packet/',artifact:'Jira issue → task packet'},
+ {n:'02',name:'Keep the context',tool:'Task Packet Store',href:'/tools/task-packet-store/',artifact:'Packet → saved location'},
+ {n:'03',name:'Capture the evidence',tool:'AC Walkthrough',href:'/tools/ac-walkthrough/',artifact:'Approved criteria → report'},
+ {n:'04',name:'Review & publish',tool:'Workflow adapter + Jira Handoff',href:'/tools/jira-handoff/',artifact:'Reviewed inputs → Jira receipt'}
+];
+---
+<ol class:list={['workflow-rail',{compact}]} aria-label="Stored-packet workflow">{steps.map(s=><li><a href={s.href}><span class="rail-number">{s.n}</span><strong>{s.name}</strong><span class="rail-tool">{s.tool}</span><span class="rail-artifact">{s.artifact}</span></a></li>)}</ol>

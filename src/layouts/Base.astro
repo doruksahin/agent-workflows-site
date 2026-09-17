@@ -1,8 +1,9 @@
 ---
 import '../styles/global.css';
-const { title = 'A field guide to agent workflows', description = 'Explore the tools, understand the boundaries, and follow the evidence. A field guide to Doruk’s agent workflows.' } = Astro.props;
+import '../styles/explore.css';
+const { title = 'A field guide to agent workflows', description = 'Explore the tools, understand the boundaries, and follow the evidence. A field guide to Doruk’s agent workflows.', immersive = false } = Astro.props;
 const path = Astro.url.pathname;
-const nav = [['/tools/', 'Tools'], ['/guides/', 'Guides'], ['/map/', 'System map']];
+const nav = [['/tools/', 'Tools & repos'], ['/guides/', 'Guides'], ['/map/', 'System map']];
 ---
 <!doctype html>
 <html lang="en">
@@ -18,13 +19,13 @@ const nav = [['/tools/', 'Tools'], ['/guides/', 'Guides'], ['/map/', 'System map
   <meta property="og:url" content={new URL(path, Astro.site)} />
   <meta name="theme-color" content="#f6f6ef" />
 </head>
-<body>
+<body class:list={{immersive}}>
   <a href="#main" class="skip">Skip to content</a>
-  <header class="header shell">
+  {!immersive && <header class="header shell">
     <a class="brand" href="/" aria-label="Agent Workflows home"><img src="/favicon.svg" width="32" height="32" alt="" /><span>Agent Workflows<span class="brand-sub">A field guide by Doruk</span></span></a>
-    <nav aria-label="Main navigation">{nav.map(([href,label]) => <a href={href} aria-current={path.startsWith(href) ? 'page' : undefined}>{label}</a>)}<a class="source-nav" href="https://github.com/doruksahin/agent-workflows-site">GitHub <span aria-hidden="true">↗</span></a></nav>
-  </header>
+    <nav aria-label="Main navigation">{nav.map(([href,label]) => <a href={href} aria-current={path.startsWith(href) ? 'page' : undefined}>{label}</a>)}</nav>
+  </header>}
   <main id="main"><slot /></main>
-  <footer class="footer shell"><div><a class="footer-name" href="/">Agent Workflows</a><p>Understand the tools. Follow the evidence.</p></div><div class="footer-links"><a href="/about/">About & sources</a><a href="https://github.com/doruksahin/agent-workflows-site">Improve this guide ↗</a><a href="https://doruk.uk">doruk.uk ↗</a></div><p class="small">An independent guide. Repository access varies.</p></footer>
+  {!immersive && <footer class="footer shell"><div><a class="footer-name" href="/">Agent Workflows</a><p>Understand the tools. Follow the evidence.</p></div><div class="footer-links"><a href="/about/">About & sources</a><a href="https://github.com/doruksahin/agent-workflows-site">Website source ↗</a><a href="https://doruk.uk">doruk.uk ↗</a></div></footer>}
 </body>
 </html>

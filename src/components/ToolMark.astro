@@ -1,0 +1,5 @@
+---
+const {slug}=Astro.props;
+const marks:Record<string,string>={recon:'M5 5h10v10H5z M15 15l5 5 M8 10h4 M10 8v4','ac-walkthrough':'M4 4h16v16H4z M7 12l3 3 7-7','adc-pathfinder':'M4 12h7 M11 12V5h8 M11 12v7h8 M16 2l3 3-3 3 M16 16l3 3-3 3','jira-to-packet':'M4 5h7v5H4z M13 14h7v6h-7z M11 7h5v7','task-packet-store':'M4 6l8-4 8 4-8 4z M4 11l8 4 8-4 M4 16l8 4 8-4','jira-markdown-exporter':'M5 3h10l4 4v14H5z M15 3v5h4 M8 12h8 M8 16h5','jira-handoff':'M3 5h18v14H3z M3 5l9 8 9-8','agent-sessions':'M3 5h18v14H3z M7 9l3 3-3 3 M13 15h4','session-marking':'M6 3h12v18l-6-4-6 4z M9 8h6','plugin-architecture':'M9 2h6v6H9z M2 16h6v6H2z M16 16h6v6h-6z M12 8v4H5v4 M12 12h7v4'};
+---
+<span class={'tool-mark mark-'+slug}><svg viewBox="0 0 24 24" width="27" height="27" aria-hidden="true"><path d={marks[slug]} fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>

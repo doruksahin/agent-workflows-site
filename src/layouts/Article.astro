@@ -1,5 +1,6 @@
 ---
 import Base from './Base.astro';
+import WorkflowRail from '../components/WorkflowRail.astro';
 const {frontmatter}=Astro.props;
 ---
-<Base title={frontmatter.title} description={frontmatter.description}><article class="article shell"><header class="page-head"><div class="breadcrumb"><a href="/guides/">Guides</a> / Workflow walkthrough</div><div class="eyebrow">6 min read · Source reviewed 17 Sep 2026</div><h1>{frontmatter.title}</h1><p class="lead">{frontmatter.description}</p></header><div class="prose"><slot /></div></article></Base>
+<Base title={frontmatter.title} description={frontmatter.description}><article class="article shell"><header class="page-head"><div class="breadcrumb"><a href="/guides/">Guides</a> / Workflow walkthrough</div><div class="eyebrow">6 min read · Source reviewed 17 Sep 2026</div><h1>{frontmatter.title}</h1><p class="lead">{frontmatter.description}</p></header><WorkflowRail/><div class="prose"><slot /></div></article></Base>
