@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://workflows.doruk.uk/sitemap.xml

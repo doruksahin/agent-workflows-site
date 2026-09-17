@@ -1,0 +1,6 @@
+---
+import Base from '../../layouts/Base.astro';
+import tools from '../../data/tools.json';
+const groups=[...new Set(tools.map(t=>t.group))];
+---
+<Base title="The tool catalog" description="Find the right tool across ten agent workflow components, with inputs, outputs, boundaries, and source references."><div class="shell"><div class="page-head"><div class="eyebrow">The catalog / 10 components</div><h1>A place for<br /><em>every tool.</em></h1><p class="lead">Start with the responsibility. Each entry explains when to use the tool, what goes in, what comes out, and where to read the source.</p><p class="small">Some components have private source repositories. Their explanations are public; source links require access.</p></div>{groups.map(group=><section class="catalog-group"><h2>{group}<span>{tools.filter(t=>t.group===group).length.toString().padStart(2,'0')}</span></h2>{tools.filter(t=>t.group===group).map(t=><a class="tool-row" href={'/tools/'+t.slug+'/'}><h3>{t.name}</h3><p>{t.summary}</p><span class:list={['badge',{'private':!t.public}]}>{t.public?'Public source':'Private source'}</span><span class="arrow" aria-hidden="true">↗</span></a>)}</section>)}</div></Base>

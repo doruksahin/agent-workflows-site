@@ -1,0 +1,10 @@
+{
+  "generator": "Archify",
+  "generatorSource": "https://github.com/tt-a1i/archify",
+  "reviewedAt": "2026-09-17",
+  "html": "public/maps/agent-workflows.html",
+  "sha256": "7cb376f003ac2fb2a64d4ce822bf94ab9ffa36edac1e50ab3ea48338d1c31274",
+  "scope": "Curated orientation map. Cross-repository architecture remains owned by plugin-architecture.",
+  "sourceWorkspace": "doruksahin/agent-workflows",
+  "sourceCommit": "18ffb6cdd825278ae1236d7c7d4facfaa54145e9"
+}

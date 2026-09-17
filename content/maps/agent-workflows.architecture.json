@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Agent Workflows — What We Have",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "viewBox": [960, 420]
+  },
+  "components": [
+    {
+      "id": "pathfinder",
+      "type": "backend",
+      "label": "ADC Pathfinder",
+      "sublabel": "Routes packet work",
+      "tag": "plugin",
+      "pos": [40, 160],
+      "size": [180, 76]
+    },
+    {
+      "id": "jira_to_packet",
+      "type": "backend",
+      "label": "jira-to-packet",
+      "sublabel": "Turns a Jira ticket into a stored task packet",
+      "tag": "app",
+      "pos": [260, 160],
+      "size": [180, 76]
+    },
+    {
+      "id": "packet_store",
+      "type": "database",
+      "label": "task-packet-store",
+      "sublabel": "Stores packets and workflow artifacts",
+      "tag": "package",
+      "pos": [480, 160],
+      "size": [180, 76]
+    },
+    {
+      "id": "ac_walkthrough",
+      "type": "backend",
+      "label": "AC Visual Walkthrough",
+      "sublabel": "Verifies acceptance criteria against an app",
+      "tag": "plugin",
+      "pos": [700, 160],
+      "size": [180, 76]
+    },
+    {
+      "id": "jira_handoff",
+      "type": "backend",
+      "label": "Jira handoff",
+      "sublabel": "Publishes an exact reviewed report and comment",
+      "tag": "package",
+      "pos": [700, 300],
+      "size": [180, 76]
+    },
+    {
+      "id": "jira_exporter",
+      "type": "backend",
+      "label": "Jira Markdown Exporter",
+      "sublabel": "Captures Jira snapshots and export receipts",
+      "tag": "package",
+      "pos": [260, 20],
+      "size": [180, 76]
+    },
+    {
+      "id": "recon",
+      "type": "backend",
+      "label": "Recon",
+      "sublabel": "Discovers behavior and can save a dossier",
+      "tag": "plugin",
+      "pos": [480, 300],
+      "size": [180, 76]
+    },
+    {
+      "id": "agent_sessions",
+      "type": "backend",
+      "label": "agent-sessions",
+      "sublabel": "Lists local Codex and Claude session metadata",
+      "tag": "app",
+      "pos": [40, 20],
+      "size": [180, 76]
+    },
+    {
+      "id": "session_marking",
+      "type": "security",
+      "label": "session-marking",
+      "sublabel": "Binds the current agent session to a target",
+      "tag": "plugin",
+      "pos": [40, 300],
+      "size": [180, 76]
+    },
+    {
+      "id": "architecture",
+      "type": "external",
+      "label": "plugin-architecture",
+      "sublabel": "Owns models, decisions, contracts, and checks",
+      "tag": "architecture repository",
+      "pos": [700, 20],
+      "size": [180, 76]
+    }
+  ],
+  "connections": [
+    {
+      "id": "route_packet_creation",
+      "from": "pathfinder",
+      "to": "jira_to_packet",
+      "label": "routes packet creation",
+      "variant": "dashed",
+      "labelAt": [240, 250]
+    },
+    {
+      "id": "save_packet",
+      "from": "jira_to_packet",
+      "to": "packet_store",
+      "label": "saves packet",
+      "variant": "emphasis",
+      "labelAt": [460, 250]
+    },
+    {
+      "id": "consume_packet",
+      "from": "packet_store",
+      "to": "ac_walkthrough",
+      "label": "supplies stored packet",
+      "variant": "emphasis",
+      "labelAt": [680, 250]
+    },
+    {
+      "id": "publish_report",
+      "from": "ac_walkthrough",
+      "to": "jira_handoff",
+      "label": "publishes reviewed result",
+      "variant": "emphasis",
+      "labelAt": [790, 270]
+    },
+    {
+      "id": "export_jira",
+      "from": "jira_exporter",
+      "to": "jira_to_packet",
+      "label": "exports Jira content",
+      "labelAt": [350, 110]
+    },
+    {
+      "id": "save_dossier",
+      "from": "recon",
+      "to": "packet_store",
+      "label": "optionally saves dossier",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Primary packet path",
+      "items": [
+        "Jira ticket → stored packet → AC evidence → reviewed Jira publication",
+        "ADC Pathfinder tells an operator which owner command or skill to use"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Independent tools",
+      "items": [
+        "Recon performs discovery and can save its rendered dossier",
+        "agent-sessions lists provider metadata; session-marking records an explicit binding"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Architecture authority",
+      "items": [
+        "plugin-architecture owns the cross-repository model and contracts",
+        "agent-workflows owns checkout pins, onboarding, acceptance, and Jira handoff"
+      ]
+    }
+  ]
+}

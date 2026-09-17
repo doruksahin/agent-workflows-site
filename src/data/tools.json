@@ -1,0 +1,247 @@
+[
+  {
+    "slug": "recon",
+    "name": "Recon",
+    "group": "Understand & verify",
+    "kind": "Agent plugin",
+    "repo": "AdCreative-ai/recon-plugin",
+    "commit": "87148d77016b9011319124d196f6036416a0d9e3",
+    "public": true,
+    "summary": "Turn a Jira task into an evidence-backed implementation handoff.",
+    "when": "Use Recon before implementation when the task needs a readiness check, repository discovery, and a clear handoff.",
+    "input": "A Jira ticket, access to its evidence, and the relevant source repository.",
+    "output": "A readiness decision, a behavior contract, and an approval-gated handoff. A self-contained HTML dossier is available on demand.",
+    "how": "Triage checks whether the task is actionable. Ready tasks continue into discovery, where claims are tied to code and the work is routed into a plain brief or an opted-in governance system. The workflow stops at a human approval gate.",
+    "boundary": "Recon prepares the work; it does not implement the change. Its optional store adapter saves an already-rendered dossier. This does not mean every Recon entry point reads a stored task packet.",
+    "start": "Install the native plugin for your agent client, then follow the repository’s triage entry point. Repository and Jira access are prerequisites.",
+    "files": [
+      "README.md",
+      "recon/docs/storage.md"
+    ],
+    "related": [
+      "jira-to-packet",
+      "task-packet-store",
+      "ac-walkthrough"
+    ]
+  },
+  {
+    "slug": "ac-walkthrough",
+    "name": "AC Walkthrough",
+    "group": "Understand & verify",
+    "kind": "Agent plugin",
+    "repo": "AdCreative-ai/AC-visual-walkthrough",
+    "commit": "67cf6fb976d0076399cb1913b763c9bebb9d58c4",
+    "public": false,
+    "summary": "Verify approved acceptance criteria with reproducible steps and evidence.",
+    "when": "Use it when a runnable implementation needs to be checked against human-approved acceptance criteria. There is a separate action for drafting candidate criteria.",
+    "input": "A frozen task packet, approved criteria for verification, a supported running application, and the required agent/browser setup.",
+    "output": "A versioned HTML report with criterion verdicts, reproduction steps, and embedded evidence for review.",
+    "how": "The authoring workflow prepares the task, captures behavior, judges evidence, and builds a report. Deterministic runtime commands validate and render the artifacts; the agent and human handle judgment and review.",
+    "boundary": "A saved report is still a draft requiring review. The stored-packet runner and the interactive skills have different entry points; do not assume every interactive run can be saved into a packet. Jira publication requires a separate publisher adapter.",
+    "start": "Start with the repository’s installation guide and the plugin’s help action. For a stored packet, follow the dedicated portable-workflows guide and its supported capture target.",
+    "files": [
+      "README.md",
+      "docs/portable-workflows.md"
+    ],
+    "related": [
+      "task-packet-store",
+      "jira-handoff",
+      "recon"
+    ]
+  },
+  {
+    "slug": "adc-pathfinder",
+    "name": "ADC Pathfinder",
+    "group": "Understand & verify",
+    "kind": "Routing skill",
+    "repo": "doruksahin/agent-workflows",
+    "commit": "18ffb6cdd825278ae1236d7c7d4facfaa54145e9",
+    "path": "plugins/adc-pathfinder",
+    "public": false,
+    "summary": "Find the owning workflow for packet creation, inspection, verification, or publication.",
+    "when": "Use it when you know what you want to accomplish but are unsure which owner or entry point to use.",
+    "input": "An explicit request about packet work and enough context to select the owning tool.",
+    "output": "An explanation or an operational plan pointing at the responsible tool. Execution follows explicit authorization.",
+    "how": "The skill routes packet production to jira-to-packet, storage to task-packet-store, discovery to Recon, verification to AC Walkthrough, and AC publication to its handoff owner.",
+    "boundary": "Pathfinder owns routing. It does not own storage, Jira transport, credentials, or the publication format. Follow the selected owner’s current instructions for the actual operation.",
+    "start": "Read the skill’s README and invoke it explicitly in its supported agent environment. This workspace-owned skill is not presented here as a standalone npm package.",
+    "files": [
+      "README.md"
+    ],
+    "related": [
+      "jira-to-packet",
+      "ac-walkthrough",
+      "jira-handoff"
+    ]
+  },
+  {
+    "slug": "jira-to-packet",
+    "name": "Jira to Packet",
+    "group": "Move context & results",
+    "kind": "CLI application",
+    "repo": "doruksahin/jira-to-packet",
+    "commit": "9170efa1b16fccb64986d7878a0f808b39e1cf2e",
+    "public": false,
+    "summary": "Freeze one Jira issue into a verified, stored task packet.",
+    "when": "Use it before a storage-backed workflow needs a stable task packet from Jira.",
+    "input": "A ticket key, Jira credentials, an existing store configuration, and a fresh processing workspace.",
+    "output": "A packet-ready JSON receipt with the packet digest and its actual saved location.",
+    "how": "The producer exports Jira, verifies the exporter receipt, prepares a packet, and pushes it through the selected store. It then fetches a fresh copy and compares the files and identity before reporting success.",
+    "boundary": "This tool creates the packet. A downstream walkthrough consumes an existing packet; it does not create a missing packet by fetching Jira itself.",
+    "start": "Follow the CLI playbook to prepare the source checkout, credentials, and store. Choose filesystem, Shared Drive, or git storage independently of the machine running the command.",
+    "files": [
+      "README.md",
+      "docs/cli.md"
+    ],
+    "related": [
+      "jira-markdown-exporter",
+      "task-packet-store",
+      "ac-walkthrough"
+    ]
+  },
+  {
+    "slug": "task-packet-store",
+    "name": "Task Packet Store",
+    "group": "Move context & results",
+    "kind": "CLI & package",
+    "repo": "doruksahin/task-packet-store",
+    "commit": "1749b74322e221bb864b89dfd000da3e51da8afe",
+    "public": false,
+    "summary": "Keep frozen task packets and versioned workflow results in a selected store.",
+    "when": "Use it when separate tools or machines need to exchange a packet or retrieve a saved stage result.",
+    "input": "A credential-free store configuration plus packet or stage files. Driver credentials are supplied separately.",
+    "output": "Stored packets, reserved stage runs, snapshots, and resolved locations in a filesystem, Shared Drive, or git repository.",
+    "how": "The same command interface fetches and pushes packets, begins runs, checkpoints results, pulls stage history, and locates artifacts. Each driver owns the underlying transfer; successful commands emit JSON.",
+    "boundary": "The store persists artifacts. It does not execute the agent, start the application, or judge whether a report passed. A Drive folder or git remote is not the workflow’s execution machine.",
+    "start": "Select a driver and read the operator playbook. The fs driver needs no cloud credentials; Drive needs its supported rclone setup, and git uses your existing git authentication.",
+    "files": [
+      "README.md",
+      "docs/playbook.md"
+    ],
+    "related": [
+      "jira-to-packet",
+      "ac-walkthrough",
+      "recon"
+    ]
+  },
+  {
+    "slug": "jira-markdown-exporter",
+    "name": "Jira Markdown Exporter",
+    "group": "Move context & results",
+    "kind": "CLI & package",
+    "repo": "doruksahin/jira-markdown-exporter",
+    "commit": "7e71b3fa34f8bf7ca9b7168981034d1e80de0005",
+    "public": true,
+    "summary": "Export Jira Cloud issues into deterministic Markdown and a result receipt.",
+    "when": "Use it when a tool needs a readable Jira snapshot, selected by issue keys or JQL.",
+    "input": "Jira Cloud read access, issue keys or a JQL selector, an output directory, and a built-in or caller-owned output profile.",
+    "output": "Markdown files under the selected output layout, with a receipt recording provenance, warnings, and failures.",
+    "how": "The exporter reads Jira, normalizes the issue data, and renders it through the chosen profile. It is a one-shot process with an explicit output directory.",
+    "boundary": "The exporter is read-only against Jira. It does not own a consumer’s task packet layout or save packets into the shared store; jira-to-packet composes those steps.",
+    "start": "The README includes exact-version installation and an offline synthetic demo from a source checkout. Use the demo before configuring real Jira credentials.",
+    "files": [
+      "README.md",
+      "docs/server-operation.md"
+    ],
+    "related": [
+      "jira-to-packet",
+      "task-packet-store"
+    ]
+  },
+  {
+    "slug": "jira-handoff",
+    "name": "Jira Handoff",
+    "group": "Move context & results",
+    "kind": "Transport package",
+    "repo": "doruksahin/agent-workflows",
+    "commit": "18ffb6cdd825278ae1236d7c7d4facfaa54145e9",
+    "path": "packages/jira-handoff",
+    "public": false,
+    "summary": "Upload an exact attachment and post the caller’s prepared Jira comment.",
+    "when": "Use it from a workflow adapter after the exact publication inputs have been prepared, reviewed, and authorized.",
+    "input": "An issue key, attachment, caller-authored Jira ADF comment, expected publication identity, and stable receipt path.",
+    "output": "A Jira attachment and comment, plus a receipt recording their IDs and the publication identity.",
+    "how": "The transport verifies the input identity before a Jira write, uploads the attachment, replaces the reserved attachment URL in the comment, then posts the comment and records the result.",
+    "boundary": "It does not interpret reports, draft summaries, manage human review, or decide that publication is authorized. The calling workflow owns those responsibilities. Matching completed receipts support replay without another write.",
+    "start": "Read the package’s identity and publication contract, and use the adapter supplied by the workflow producing your report. Treat uncertain receipts as a recovery task before retrying.",
+    "files": [
+      "README.md"
+    ],
+    "related": [
+      "ac-walkthrough",
+      "adc-pathfinder"
+    ]
+  },
+  {
+    "slug": "agent-sessions",
+    "name": "Agent Sessions",
+    "group": "Find & organize",
+    "kind": "CLI application",
+    "repo": "doruksahin/agent-sessions",
+    "commit": "e49694a3ada59bccbe32dad8a4221bf1f1cc313a",
+    "public": true,
+    "summary": "List recent Codex and Claude Code sessions as normalized JSON.",
+    "when": "Use it to find recent local agent work or compose session metadata with other command-line tools.",
+    "input": "Existing local Codex and Claude Code history stores, with an optional provider filter and result limit.",
+    "output": "One combined list ordered by most recent update, with provider, session ID, title, first prompt, working directory, and timestamp.",
+    "how": "It reads local session metadata, normalizes both providers into a shared shape, and applies the requested limit after combining them. Provider failures produce a nonzero exit rather than a misleading partial result.",
+    "boundary": "It does not modify history, build an index, or parse complete transcripts. Listing a session does not bind it to a task.",
+    "start": "Install a release wheel or the source checkout with Python 3.11 or newer. The README’s first command is agent-sessions list.",
+    "files": [
+      "README.md",
+      "docs/comparison.md"
+    ],
+    "related": [
+      "session-marking"
+    ]
+  },
+  {
+    "slug": "session-marking",
+    "name": "Session Marking",
+    "group": "Find & organize",
+    "kind": "CLI & agent plugin",
+    "repo": "doruksahin/session-marking",
+    "commit": "b63c5978a669cb5c3a2cbf84447f904e7662f938",
+    "public": true,
+    "summary": "Bind an agent session to an explicit project and task.",
+    "when": "Use it when the current Codex or Claude Code session should be associated with a known work item.",
+    "input": "The current or explicit session identity, a project and task target, and any optional destination configuration.",
+    "output": "An immutable local binding by default. Enabled host integrations can also publish their own destination records.",
+    "how": "Local storage preserves the first binding and rejects a different target for that session. Optional integrations validate and record the target for their own destination.",
+    "boundary": "Local use needs no host integration. Destinations own separate records and are not synchronized. There is no prompt-submit hook that automatically marks future sessions.",
+    "start": "Follow global CLI installation, then the first-session guide. Native plugin installation is optional for command-line use.",
+    "files": [
+      "README.md",
+      "docs/cli.md",
+      "docs/installation.md"
+    ],
+    "related": [
+      "agent-sessions"
+    ]
+  },
+  {
+    "slug": "plugin-architecture",
+    "name": "Plugin Architecture",
+    "group": "System reference",
+    "kind": "Architecture registry",
+    "repo": "doruksahin/plugin-architecture",
+    "commit": "500efba206ed7011896df1eb259801229b48d19e",
+    "public": false,
+    "summary": "Record the system’s owners, interfaces, decisions, and reviewed source references.",
+    "when": "Use it to check which repository owns a responsibility or what must stay compatible across repositories.",
+    "input": "Reviewed repository snapshots, declared contracts, and architecture decisions.",
+    "output": "A shared model, workflow playbooks, architecture views, and checks for the declared boundaries.",
+    "how": "The registry records cross-repository responsibilities and reviewed source references. Its workflow playbook explains how independent commands exchange packets and results.",
+    "boundary": "This registry remains the architecture authority. The public site and its interactive map are curated explanations of a snapshot, not a replacement for the source model or compatibility checks.",
+    "start": "Start with the architecture README and the workflow playbook. Maintainers should follow the registry’s maintenance procedure before changing shared boundaries.",
+    "files": [
+      "README.md",
+      "docs/workflows.md",
+      "model/current.dsl"
+    ],
+    "related": [
+      "adc-pathfinder",
+      "task-packet-store"
+    ]
+  }
+]

@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+const intents = [
+{title:'Understand a task',text:'Check whether a Jira ticket is ready, find the relevant code, and prepare an evidence-backed handoff.',href:'/tools/recon/',label:'Explore Recon'},
+{title:'Verify an implementation',text:'Work from approved acceptance criteria and capture evidence people can inspect.',href:'/tools/ac-walkthrough/',label:'Explore AC Walkthrough'},
+{title:'Find your way around',text:'See which tool owns each step, what it produces, and how the pieces connect.',href:'/map/',label:'Open the system map'}
+];
+---
+<Base>
+<div class="shell">
+<section class="hero">
+  <div><div class="eyebrow"><span class="dot"></span>Tools, connected. Work, explained.</div><h1>Know what<br />to <em>reach for.</em></h1><p class="lead">A field guide to my agent workflows.<br />Find the right tool, understand what it does, and see how the pieces fit together.</p><div class="actions"><a class="button" href="/tools/">Explore the tools <span aria-hidden="true">↗</span></a><a class="text-link" href="/guides/jira-to-reviewed-report/">Follow a workflow →</a></div></div>
+  <div class="hero-map" aria-label="An example workflow: Jira to packet to verification to reviewed publication">
+    <div class="map-top"><span class="eyebrow">One path through the system</span><span>01—04</span></div>
+    <div class="flow-step"><span class="step-num">01</span><div><b>Start with a Jira ticket</b><small>jira-to-packet · freeze the task context</small></div></div><div class="flow-join"></div>
+    <div class="flow-step"><span class="step-num">02</span><div><b>Save a task packet</b><small>task-packet-store · keep the handoff</small></div></div><div class="flow-join"></div>
+    <div class="flow-step highlight"><span class="step-num">03</span><div><b>Verify with evidence</b><small>AC Walkthrough · inspect the behavior</small></div></div><div class="flow-join"></div>
+    <div class="flow-step"><span class="step-num">04</span><div><b>Review, then publish</b><small>Workflow adapter → Jira handoff transport</small></div></div>
+    <p class="flow-note">Separate tools. Explicit handoffs. Human review before publication.</p>
+  </div>
+</section>
+<div class="strip"><p><b>10 components</b> across the ecosystem</p><p>Explanations linked to <b>reviewed source</b></p><a class="text-link" href="/about/">How to use this guide ↗</a></div>
+<section class="section"><div class="section-head"><div><div class="eyebrow">Start with the work</div><h2 style="margin-top:12px">What are you trying to do?</h2></div><a class="text-link" href="/tools/">See every tool →</a></div><div class="intent-grid">{intents.map((x,i)=><a class="intent" href={x.href}><span class="intent-number">0{i+1} /</span><h3>{x.title}</h3><p>{x.text}</p><span class="go">{x.label} <span aria-hidden="true">↗</span></span></a>)}</div></section>
+<section class="feature"><div><div class="eyebrow">Learn the connections</div><h2 style="margin-top:18px">Follow the artifact.<br />Understand the workflow.</h2><p>Each tool has a boundary. The guides follow the actual inputs and outputs across those boundaries, with links back to the repositories that own them.</p><a class="text-link" href="/map/">Explore the interactive architecture map →</a></div><a class="guide-teaser" href="/guides/jira-to-reviewed-report/"><span class="eyebrow">Workflow guide · 6 min read</span><h3>From a Jira ticket<br />to a reviewed report.</h3><p>Where the task is frozen, where evidence is captured, and what must happen before anything reaches Jira.</p><span class="go">Read the walkthrough <span aria-hidden="true">↗</span></span></a></section>
+</div>
+</Base>
