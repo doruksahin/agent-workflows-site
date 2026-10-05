@@ -33,8 +33,9 @@ git rev-parse 'v0.1.0^{commit}'
 2. Click **Deploy**. Confirm the deployment reports that exact SHA and becomes
    healthy. The Docker build installs the locked dependencies and runs
    `npm run verify` before producing the static image.
-3. Check `/`, `/tools/`, one tool detail, `/guides/jira-to-reviewed-report/`, and
-   `/map/` over public HTTPS. Check that the map opens and the disclosures expand.
+3. Check `/`, `/tools/`, one tool detail, `/guides/jira-to-reviewed-report/`,
+   `/map/`, `/notes/`, `/notes/langfuse-tracing-claude-code/`, and `/notes/rss.xml`
+   over public HTTPS. Check that the map opens and the disclosures expand.
 4. Download `/downloads/agent-workflows.html` and compare its SHA-256 with
    `content/maps/provenance.json` at the released commit. Use the download route;
    Cloudflare can inject a browser-check script into the inline HTML route.

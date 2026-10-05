@@ -3,7 +3,7 @@
 This repository is the source of truth for https://workflows.doruk.uk.
 
 - Source: https://github.com/doruksahin/agent-workflows-site
-- Content: `src/data/tools.json` and `src/pages/guides/`
+- Content: `src/data/tools.json`, `src/pages/guides/`, and `src/content/notes/`
 - Deployment contract: [deployment.md](deployment.md)
 - Versioning and release review: [README.md](README.md#version-and-release)
 - Release history: https://github.com/doruksahin/agent-workflows-site/releases
