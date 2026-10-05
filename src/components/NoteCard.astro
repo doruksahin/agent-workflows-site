@@ -4,4 +4,4 @@ interface Props { note: Note }
 const { note } = Astro.props;
 const folder = noteFolder(note);
 ---
-<a class="guide-teaser" href={notePath(note)} data-note={note.id}><span class="eyebrow"><time datetime={note.data.date.toISOString()}>{formatDate(note.data.date)}</time> · {note.data.tags.join(' · ')}</span>{folder && <span class="path-chip">{folder}/</span>}<h3>{note.data.title}</h3><p>{note.data.summary}</p><span class="go">Read the note →</span></a>
+<a class="guide-teaser" href={notePath(note)} data-note={note.id} data-tags={note.data.tags.join(' ')}><span class="eyebrow"><time datetime={note.data.date.toISOString()}>{formatDate(note.data.date)}</time> · {note.data.tags.join(' · ')}</span>{folder && <span class="path-chip">{folder}/</span>}<h3>{note.data.title}</h3><p>{note.data.summary}</p><span class="go">Read the note →</span></a>
