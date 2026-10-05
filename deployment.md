@@ -8,7 +8,7 @@
 - Coolify application: `agent-workflows-site` (`lnv4671o2e912w8s2b8if72i`)
 - Build pack: Dockerfile at `/Dockerfile`
 - Application port: `80`
-- Build: Node 24, `npm ci`, then `npm run verify`
+- Build: Node 24 with Corepack pnpm, `pnpm install --frozen-lockfile`, then `pnpm verify`
 - Runtime: Nginx serving Astro's static `dist/`
 - Health check: `GET /`
 - Runtime limits: 128 MiB memory, 0.5 CPU
@@ -32,7 +32,7 @@ git rev-parse 'v0.1.0^{commit}'
    and save. Do not select the moving `main` tip as a substitute for the release.
 2. Click **Deploy**. Confirm the deployment reports that exact SHA and becomes
    healthy. The Docker build installs the locked dependencies and runs
-   `npm run verify` before producing the static image.
+   `pnpm verify` before producing the static image.
 3. Check `/`, `/tools/`, one tool detail, `/guides/jira-to-reviewed-report/`,
    `/map/`, `/notes/`, `/notes/observability/`, `/notes/observability/diagnose-with-cli/`,
    `/notes/observability/images/02-trace-tree.jpg`, and `/notes/rss.xml` over public HTTPS. Check that the map opens and the disclosures expand.

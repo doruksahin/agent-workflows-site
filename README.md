@@ -9,17 +9,18 @@ references, follow a [workflow guide](https://workflows.doruk.uk/guides/), or op
 
 ## Develop
 
-Requires Node.js 22.12+ (Node 24 is used in deployment).
+Requires Node.js 22.12+ (Node 24 is used in deployment) and pnpm. Run `corepack enable`
+once to use the pnpm version pinned in `package.json`.
 
 ```sh
-npm ci
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 ## Verify
 
 ```sh
-npm run verify
+pnpm verify
 ```
 
 Runs the unit tests, builds the site, and checks local link targets, source provenance, referenced tool relationships, and the included map checksum. It also checks the notes pages, RSS feed, sitemap, draft exclusion, note paths and links, published attachments, unreferenced assets, and private details in note files. Production output is in `dist/`.
@@ -44,11 +45,11 @@ permissions.
   extensions are `jpg`, `png`, `webp`, `gif`, `svg`, and `pdf`; to add one, add
   `src/pages/notes/[...file].<ext>.ts`. Use a date-only `YYYY-MM-DD` value for `date`
   and `updated`; a time with an offset can show a different day. `draft: true` keeps a
-  file out of production. A draft that contains images fails `npm run verify`, because
+  file out of production. A draft that contains images fails `pnpm verify`, because
   Astro still emits its images: keep the images out of a draft until you publish it.
   Render Mermaid sources to committed SVG files next to them with
   `npx -y @mermaid-js/mermaid-cli@11 -c scripts/mermaid.config.json -i <in.mmd> -o <out.svg>`.
-  `npm run verify` rejects private details that match `scripts/disclosure-rules.json`.
+  `pnpm verify` rejects private details that match `scripts/disclosure-rules.json`.
   The scan is only a safety net: review the screenshots and text yourself.
 - `src/pages/about.astro`: editorial scope and source policy.
 - `src/components/`: reusable tool cards, icons, and visual workflow steps.
@@ -62,8 +63,8 @@ Review the actual source revision before updating a claim. Update the commit ref
 ## Version and release
 
 [Release Please](https://github.com/googleapis/release-please) manages one website
-version using the Node strategy. It updates `package.json`, `package-lock.json`,
-`.release-please-manifest.json`, and `CHANGELOG.md` in a release PR. Merging that PR
+version using the Node strategy. It updates `package.json`, `.release-please-manifest.json`, and
+`CHANGELOG.md` in a release PR. Merging that PR
 causes the next successful Release Please run to create a `vX.Y.Z` tag and
 [GitHub release](https://github.com/doruksahin/agent-workflows-site/releases).
 There is no npm publication; `private: true` prevents accidental npm publishing
