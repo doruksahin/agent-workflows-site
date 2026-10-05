@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/doruksahin/agent-workflows-site/compare/v0.3.0...v0.4.0) (2026-10-05)
+
+
+### Features
+
+* **knowledge-base:** sync observability docs verbatim with redaction ([#7](https://github.com/doruksahin/agent-workflows-site/issues/7)) ([92fa3e6](https://github.com/doruksahin/agent-workflows-site/commit/92fa3e623af729e69bb152cbeb46072cd2cffea2))
+
 ## [0.3.0](https://github.com/doruksahin/agent-workflows-site/compare/v0.2.0...v0.3.0) (2026-10-05)
 
 
