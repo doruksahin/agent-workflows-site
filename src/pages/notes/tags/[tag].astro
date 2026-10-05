@@ -1,12 +1,12 @@
 ---
-import Base from '../../../layouts/Base.astro';
-import NoteCard from '../../../components/NoteCard.astro';
-import { publishedNotes, noteTags } from '../../../lib/notes';
+import NotesFrame from '../../../layouts/NotesFrame.astro';
+import NoteList from '../../../components/NoteList.astro';
+import { publishedNotes, noteTags, noteTree } from '../../../lib/notes';
 export async function getStaticPaths() {
   const notes = await publishedNotes();
-  return noteTags(notes).map(tag => ({ params: { tag }, props: { notes: notes.filter(n => n.data.tags.includes(tag)) } }));
+  return noteTags(notes).map(tag => ({ params: { tag }, props: { notes: notes.filter(n => n.data.tags.includes(tag)), tree: noteTree(notes) } }));
 }
 const { tag } = Astro.params;
-const { notes } = Astro.props;
+const { notes, tree } = Astro.props;
 ---
-<Base title={`Notes tagged ${tag}`} description={`Notes about ${tag} from building and running agent workflows.`}><div class="shell"><div class="page-head"><div class="breadcrumb"><a href="/notes/">Notes</a> / Tag</div><h1>{tag}</h1><p class="lead">{notes.length} {notes.length === 1 ? 'note' : 'notes'}.</p></div><div class="guide-grid">{notes.map(note => <NoteCard note={note} />)}</div></div></Base>
+<NotesFrame tree={tree} title={`Notes tagged ${tag}`} description={`Notes about ${tag} from building and running agent workflows.`}><div class="page-head"><div class="breadcrumb"><a href="/notes/">Notes</a> / Tag</div><h1>{tag}</h1><p class="lead">{notes.length} {notes.length === 1 ? 'note' : 'notes'}.</p></div><NoteList notes={notes} /></NotesFrame>

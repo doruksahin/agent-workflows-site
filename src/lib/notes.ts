@@ -13,6 +13,17 @@ export async function publishedNotes(): Promise<Note[]> {
 }
 export const noteTags = (notes: Note[]) => [...new Set(notes.flatMap(n => n.data.tags))].sort();
 export const formatDate = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+/** Notes grouped by calendar day, in the order given. */
+export function groupByDate(notes: Note[]) {
+  const groups: { label: string; date: Date; notes: Note[] }[] = [];
+  for (const note of notes) {
+    const label = formatDate(note.data.date);
+    const last = groups[groups.length - 1];
+    if (last?.label === label) last.notes.push(note);
+    else groups.push({ label, date: note.data.date, notes: [note] });
+  }
+  return groups;
+}
 /** Source path under src/content/notes/, such as observability/README.mdx. */
 export const noteSource = (note: Note) => note.filePath!.slice(notesDir.length + 1);
 export const notePath = (note: Note) => noteUrl(noteSource(note));

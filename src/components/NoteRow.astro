@@ -1,0 +1,6 @@
+---
+import { notePath, type Note } from '../lib/notes';
+interface Props { note: Note }
+const { note } = Astro.props;
+---
+<a class="note-row" href={notePath(note)} data-note={note.id} data-tags={note.data.tags.join(' ')}><span class="note-row-title">{note.data.title}</span><span class="row-tags">{note.data.tags.map(t => <span class="badge" data-row-tag={t}>{t}</span>)}</span></a>

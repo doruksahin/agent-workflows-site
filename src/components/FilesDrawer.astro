@@ -1,0 +1,8 @@
+---
+import NoteTree from './NoteTree.astro';
+import type { TreeFolder } from '../lib/notes';
+interface Props { dir: TreeFolder; current?: string }
+const { dir, current } = Astro.props;
+---
+<dialog class="drawer" id="files-drawer" aria-label="Files"><div class="drawer-head"><span class="eyebrow">Files</span><button type="button" class="viewer-btn" data-close-files aria-label="Close files">×</button></div><div class="drawer-body"><NoteTree dir={dir} current={current} searchable /></div></dialog>
+<script is:inline>(()=>{const d=document.getElementById('files-drawer');document.addEventListener('click',e=>{if(e.target.closest('[data-open-files]'))d.showModal()});d.addEventListener('click',e=>{if(e.target===d||e.target.closest('[data-close-files]'))d.close()})})();</script>
