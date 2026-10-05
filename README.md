@@ -38,7 +38,7 @@ permissions.
 - `src/content/knowledge-base/<folder>/`: dated entries with tags, in the folder structure of their
   source. Copy a source folder as it is, then make it generic. File and folder names keep
   their source spelling, but each name must be URL-safe (`A-Z a-z 0-9 . _ -`). Each
-  `.md` or `.mdx` file is one page, and `README.md` is the folder's own page. Relative
+  `.md` or `.mdx` file is one page, including `README.md`; a folder URL lists its files. Relative
   `.md` links and attachment links are rewritten to site URLs at build time. A link to a
   missing file, or to a file outside `src/content/knowledge-base/`, fails the build. An attachment
   is served only when a published file links to it or embeds it. The allowed attachment

@@ -4,10 +4,9 @@ import { posix } from 'node:path';
 export const SAFE_SEGMENT = /^[A-Za-z0-9._-]+$/;
 export const RESERVED_ROOT = ['tags', 'rss.xml'];
 export const isDoc = rel => /\.mdx?$/.test(rel);
-export const isReadme = rel => /^README\.mdx?$/.test(posix.basename(rel));
 const parent = rel => posix.dirname(rel).replace(/^\.$/, '');
-/** Collection ID: the path without extension; a README is its folder. */
-export const noteId = rel => isReadme(rel) ? parent(rel) : rel.replace(/\.mdx?$/, '');
+/** Collection ID: the path without extension. A README is an ordinary note; a folder URL is its file listing. */
+export const noteId = rel => rel.replace(/\.mdx?$/, '');
 export const folderUrl = dir => dir ? `/knowledge-base/${dir}/` : '/knowledge-base/';
 /** Page URL for a Markdown file, raw URL for an attachment. */
 export const noteUrl = rel => isDoc(rel) ? folderUrl(noteId(rel)) : `/knowledge-base/${rel}`;
@@ -18,13 +17,12 @@ export const viewUrl = rel => isImage(rel) && parent(rel) ? `${folderUrl(parent(
 
 export function pathErrors(rel) {
   const errors = rel.split('/').filter(s => !SAFE_SEGMENT.test(s)).map(s => `Unsafe path segment "${s}" in ${rel}: use A-Z a-z 0-9 . _ -`);
-  if (isDoc(rel) && isReadme(rel) && !parent(rel)) errors.push(`README at the knowledge base root: ${rel} (/knowledge-base/ is the index)`);
   const first = (isDoc(rel) ? noteId(rel) : rel).split('/')[0];
   if (RESERVED_ROOT.includes(first)) errors.push(`Reserved root name "${first}" in ${rel}`);
   return errors;
 }
 
-/** Sources (files, and folders as "dir/") that would share a URL. A README shares its folder's URL by design. */
+/** Sources (files, and folders as "dir/") that would share a URL. */
 export function urlCollisions(rels) {
   const claims = new Map();
   const claim = (key, source) => claims.set(key, [...new Set([...(claims.get(key) ?? []), source])]);
@@ -33,8 +31,8 @@ export function urlCollisions(rels) {
     const parts = rel.split('/');
     for (let i = 1; i < parts.length; i++) claim(folderUrl(parts.slice(0, i).join('/')).replace(/\/$/, ''), parts.slice(0, i).join('/') + '/');
   }
-  const folderish = x => x.endsWith('/') || (isDoc(x) && isReadme(x));
-  return [...claims].filter(([, s]) => s.filter(x => isDoc(x) && isReadme(x)).length > 1 || s.filter(x => !folderish(x)).length + (s.some(folderish) ? 1 : 0) > 1)
+  const folderish = x => x.endsWith('/');
+  return [...claims].filter(([, s]) => s.filter(x => !folderish(x)).length + (s.some(folderish) ? 1 : 0) > 1)
     .map(([key, s]) => `URL ${key}${s.some(x => x.endsWith('/') || isDoc(x)) ? '/' : ''} is claimed by ${s.join(', ')}`);
 }
 

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { getImage } from 'astro:assets';
 import { imageMetadata } from 'astro/assets/utils';
-import { folderUrl, isDoc, isImage, isReadme, linkedFiles, noteUrl, viewUrl } from '../../scripts/note-paths.mjs';
+import { folderUrl, isDoc, isImage, linkedFiles, noteUrl, viewUrl } from '../../scripts/note-paths.mjs';
 
 export type Note = CollectionEntry<'knowledgeBase'>;
 export const entriesDir = 'src/content/knowledge-base';
@@ -31,7 +31,7 @@ export const noteFolder = (note: Note) => noteSource(note).split('/').slice(0, -
 
 /** url is the page or raw URL; href is the link in trees and listings (an image's gallery deep link). usedIn lists the published docs that link to or embed a file. */
 export type TreeFile = { kind: 'doc' | 'file'; name: string; rel: string; url: string; href: string; note?: Note; usedIn: { name: string; url: string }[] };
-export type TreeFolder = { kind: 'folder'; name: string; rel: string; url: string; children: (TreeFolder | TreeFile)[]; readme?: Note };
+export type TreeFolder = { kind: 'folder'; name: string; rel: string; url: string; children: (TreeFolder | TreeFile)[] };
 /** Published Markdown files plus the attachments they link to or embed, as source-named folders. */
 export function noteTree(entries: Note[]): TreeFolder {
   const root: TreeFolder = { kind: 'folder', name: 'knowledge-base', rel: '', url: folderUrl(''), children: [] };
@@ -49,8 +49,7 @@ export function noteTree(entries: Note[]): TreeFolder {
   };
   for (const note of entries) {
     const rel = noteSource(note);
-    const { dir } = add(rel, 'doc', note);
-    if (isReadme(rel)) dir.readme = note;
+    add(rel, 'doc', note);
     for (const target of new Set(linkedFiles(rel, note.body ?? '')))
       if (!isDoc(target) && existsSync(join(entriesDir, target)) && statSync(join(entriesDir, target)).isFile()) add(target, 'file').file.usedIn.push({ name: rel.split('/').pop()!, url: noteUrl(rel) });
   }
