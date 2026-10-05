@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/doruksahin/agent-workflows-site/compare/v0.1.0...v0.2.0) (2026-10-05)
+
+
+### Features
+
+* **notes:** add notes with folder and blog views ([#2](https://github.com/doruksahin/agent-workflows-site/issues/2)) ([de788fe](https://github.com/doruksahin/agent-workflows-site/commit/de788fe150e5e75c93c5c6201465996c0a281e55))
+
 ## 0.1.0 (2026-09-17)
 
 
