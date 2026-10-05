@@ -1,0 +1,7 @@
+---
+import NoteRow from './NoteRow.astro';
+import { groupByDate, type Note } from '../lib/entries';
+interface Props { entries: Note[] }
+const { entries } = Astro.props;
+---
+{groupByDate(entries).map(g => <section class="note-group"><h2 class="eyebrow"><time datetime={g.date.toISOString()}>{g.label}</time></h2><div class="note-rows">{g.entries.map(note => <NoteRow note={note} />)}</div></section>)}

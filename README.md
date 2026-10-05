@@ -23,7 +23,7 @@ pnpm dev
 pnpm verify
 ```
 
-Runs the unit tests, builds the site, and checks local link targets, source provenance, referenced tool relationships, and the included map checksum. It also checks the notes pages, RSS feed, sitemap, draft exclusion, note paths and links, published attachments, unreferenced assets, and private details in note files. Production output is in `dist/`.
+Runs the unit tests, builds the site, and checks local link targets, source provenance, referenced tool relationships, and the included map checksum. It also checks the entries pages, RSS feed, sitemap, draft exclusion, note paths and links, published attachments, unreferenced assets, and private details in note files. Production output is in `dist/`.
 
 The **Verify** GitHub Actions workflow runs these checks on pull requests and manual
 dispatches. **Release Please** reuses the same check on pushes to `main` before
@@ -35,15 +35,15 @@ permissions.
 
 - `src/data/tools.json`: tool explanations and reviewed source references.
 - `src/pages/guides/*.md`: Markdown walkthroughs with inline source links.
-- `src/content/notes/<folder>/`: dated notes with tags, in the folder structure of their
+- `src/content/knowledge-base/<folder>/`: dated entries with tags, in the folder structure of their
   source. Copy a source folder as it is, then make it generic. File and folder names keep
   their source spelling, but each name must be URL-safe (`A-Z a-z 0-9 . _ -`). Each
   `.md` or `.mdx` file is one page, and `README.md` is the folder's own page. Relative
   `.md` links and attachment links are rewritten to site URLs at build time. A link to a
-  missing file, or to a file outside `src/content/notes/`, fails the build. An attachment
+  missing file, or to a file outside `src/content/knowledge-base/`, fails the build. An attachment
   is served only when a published file links to it or embeds it. The allowed attachment
   extensions are `jpg`, `png`, `webp`, `gif`, `svg`, and `pdf`; to add one, add
-  `src/pages/notes/[...file].<ext>.ts`. Use a date-only `YYYY-MM-DD` value for `date`
+  `src/pages/knowledge-base/[...file].<ext>.ts`. Use a date-only `YYYY-MM-DD` value for `date`
   and `updated`; a time with an offset can show a different day. `draft: true` keeps a
   file out of production. A draft that contains images fails `pnpm verify`, because
   Astro still emits its images: keep the images out of a draft until you publish it.

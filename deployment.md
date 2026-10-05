@@ -34,8 +34,8 @@ git rev-parse 'v0.1.0^{commit}'
    healthy. The Docker build installs the locked dependencies and runs
    `pnpm verify` before producing the static image.
 3. Check `/`, `/tools/`, one tool detail, `/guides/jira-to-reviewed-report/`,
-   `/map/`, `/notes/`, `/notes/observability/`, `/notes/observability/diagnose-with-cli/`,
-   `/notes/observability/images/02-trace-tree.jpg`, and `/notes/rss.xml` over public HTTPS. Check that the map opens and the disclosures expand.
+   `/map/`, `/knowledge-base/`, `/knowledge-base/observability/`, `/knowledge-base/observability/diagnose-with-cli/`,
+   `/knowledge-base/observability/images/02-trace-tree.jpg`, and `/knowledge-base/rss.xml` over public HTTPS. Check that the map opens and the disclosures expand.
 4. Download `/downloads/agent-workflows.html` and compare its SHA-256 with
    `content/maps/provenance.json` at the released commit. Use the download route;
    Cloudflare can inject a browser-check script into the inline HTML route.
