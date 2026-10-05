@@ -1,0 +1,12 @@
+[
+  { "id": "employer-name", "pattern": "adcreative|appier", "flags": "i" },
+  { "id": "secret-manager", "pattern": "infisical", "flags": "i" },
+  { "id": "secret-command", "pattern": "gh secret set", "flags": "i" },
+  { "id": "ticket-key", "pattern": "\\bATT-\\d+\\b" },
+  { "id": "ci-run-url", "pattern": "/actions/runs/\\d+" },
+  { "id": "email", "pattern": "[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}\\b" },
+  { "id": "ci-run-id", "pattern": "(?<![\\w.])\\d{10,}(?!\\w|\\.\\d)" },
+  { "id": "trace-id", "pattern": "\\b[0-9a-f]{32}\\b" },
+  { "id": "internal-script-path", "pattern": "\\.github/scripts/" },
+  { "id": "internal-script-name", "pattern": "run-walkthrough|walkthrough-delivery" }
+]

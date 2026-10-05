@@ -3,7 +3,7 @@ import '../styles/global.css';
 import '../styles/explore.css';
 const { title = 'A field guide to agent workflows', description = 'Explore the tools, understand the boundaries, and follow the evidence. A field guide to Doruk’s agent workflows.', immersive = false } = Astro.props;
 const path = Astro.url.pathname;
-const nav = [['/tools/', 'Tools & repos'], ['/guides/', 'Guides'], ['/map/', 'System map']];
+const nav = [['/tools/', 'Tools & repos'], ['/guides/', 'Guides'], ['/notes/', 'Notes'], ['/map/', 'System map']];
 ---
 <!doctype html>
 <html lang="en">
@@ -12,6 +12,7 @@ const nav = [['/tools/', 'Tools & repos'], ['/guides/', 'Guides'], ['/map/', 'Sy
   <title>{title} · Agent Workflows</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={new URL(path, Astro.site)} />
+  <link rel="alternate" type="application/rss+xml" title="Agent Workflows notes" href="/notes/rss.xml" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta property="og:title" content={title + ' · Agent Workflows'} />
   <meta property="og:description" content={description} />
