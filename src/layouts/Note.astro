@@ -1,0 +1,7 @@
+---
+import Base from './Base.astro';
+import { formatDate, type Note } from '../lib/notes';
+interface Props { note: Note }
+const { title, summary, date, updated, tags, source } = Astro.props.note.data;
+---
+<Base title={title} description={summary}><article class="article shell"><header class="page-head"><div class="breadcrumb"><a href="/notes/">Notes</a> / Note</div><div class="eyebrow"><time datetime={date.toISOString()}>{formatDate(date)}</time>{updated && <> · Updated <time datetime={updated.toISOString()}>{formatDate(updated)}</time></>}</div><h1>{title}</h1><p class="lead">{summary}</p><div class="tag-list">{tags.map(t => <a class="badge" href={`/notes/tags/${t}/`}>{t}</a>)}</div></header><div class="prose"><slot />{source && <p class="reference-note">Source: {source}</p>}</div></article></Base>

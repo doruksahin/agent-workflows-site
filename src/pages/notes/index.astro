@@ -1,0 +1,7 @@
+---
+import Base from '../../layouts/Base.astro';
+import NoteCard from '../../components/NoteCard.astro';
+import { publishedNotes, noteTags } from '../../lib/notes';
+const notes = await publishedNotes();
+---
+<Base title="Notes" description="Learned experience from building and running agent workflows: setups, diagnoses, and what worked."><div class="shell"><div class="page-head"><div class="eyebrow">Notes</div><h1>What the work<br /><em>taught us.</em></h1><p class="lead">Setups, diagnoses, and lessons from building and running agent workflows.</p><div class="tag-list">{noteTags(notes).map(t => <a class="badge" href={`/notes/tags/${t}/`}>{t}</a>)}</div></div><div class="guide-grid">{notes.map(note => <NoteCard note={note} />)}</div></div></Base>
