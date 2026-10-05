@@ -1,0 +1,9 @@
+---
+import type { TreeFolder } from '../lib/notes';
+interface Props { dir: TreeFolder; current?: string }
+const { dir, current } = Astro.props;
+const here = (url: string) => url === current ? 'page' : undefined;
+---
+<ul class="note-tree">{dir.children.map(c => c.kind === 'folder'
+  ? <li><details open><summary><a href={c.url} aria-current={here(c.url)}>{c.name}/</a></summary><Astro.self dir={c} current={current} /></details></li>
+  : <li><a href={c.url} aria-current={c.kind === 'doc' && !c.name.startsWith('README.') ? here(c.url) : undefined}>{c.name}</a></li>)}</ul>

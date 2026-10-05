@@ -1,0 +1,28 @@
+---
+import { render } from 'astro:content';
+import Note from '../../layouts/Note.astro';
+import { noteTree, treeFolders, noteSource, publishedNotes, type Note as Entry, type TreeFolder } from '../../lib/notes';
+import { isReadme } from '../../../scripts/note-paths.mjs';
+export async function getStaticPaths() {
+  const notes = await publishedNotes();
+  const tree = noteTree(notes);
+  return [
+    ...treeFolders(tree).filter(f => f.rel).map(folder => ({ params: { path: folder.rel }, props: { tree, folder, note: folder.readme } })),
+    ...notes.filter(n => !isReadme(noteSource(n))).map(note => ({ params: { path: note.id }, props: { tree, note } })),
+  ];
+}
+interface Props { tree: TreeFolder; folder?: TreeFolder; note?: Entry }
+const { tree, folder, note } = Astro.props;
+const rel = folder ? folder.rel : noteSource(note!);
+const parts = rel.split('/');
+const crumbs = [{ name: 'notes', url: '/notes/' }, ...parts.map((name, i) => ({ name, url: i === parts.length - 1 && !folder ? Astro.url.pathname : `/notes/${parts.slice(0, i + 1).join('/')}/` }))];
+// The glob loader logs a Markdown render error (such as a broken relative link) and continues; fail instead.
+if (note && note.filePath!.endsWith('.md') && !note.rendered) throw new Error(`${note.filePath} did not render; see the [glob-loader] error above`);
+const Content = note ? (await render(note)).Content : null;
+const title = note?.data.title ?? `${folder!.name}/`;
+const description = note?.data.summary ?? `Files in notes/${rel}/.`;
+---
+<Note tree={tree} current={Astro.url.pathname} crumbs={crumbs} title={title} description={description} note={note}>
+  {folder && <ul class="note-list" slot="listing">{folder.children.map(c => <li><a href={c.url}>{c.name}{c.kind === 'folder' && '/'}</a><span>{c.kind === 'folder' ? 'Folder' : c.kind === 'doc' ? c.note!.data.title : c.name.split('.').pop()!.toUpperCase()}</span></li>)}</ul>}
+  {Content && <Content />}
+</Note>

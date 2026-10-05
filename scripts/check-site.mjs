@@ -1,8 +1,9 @@
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { resolve, join } from 'node:path';
+import { resolve, join, relative, sep } from 'node:path';
 import assert from 'node:assert/strict';
 import { loadRules, scanText } from './disclosure.mjs';
+import { noteId, noteUrl, folderUrl, isDoc, isReadme, pathErrors, urlCollisions, linkedFiles, relativeTargets, resolveTarget } from './note-paths.mjs';
 const root=resolve('dist');
 const walk=dir=>readdirSync(dir).flatMap(n=>{const p=join(dir,n);return statSync(p).isDirectory()?walk(p):[p]});
 const tools=JSON.parse(readFileSync('src/data/tools.json','utf8'));
@@ -15,23 +16,48 @@ for(const tool of tools){
  for(const related of tool.related) assert.ok(slugs.has(related),'Unknown related tool: '+related);
 }
 const notesDir='src/content/notes';
-const frontmatter=file=>(readFileSync(file,'utf8').match(/^\uFEFF?---\r?\n([\s\S]*?)\r?\n---/)||[,''])[1];
-const notes=existsSync(notesDir)?readdirSync(notesDir).flatMap(slug=>{const files=['index.mdx','index.md'].map(n=>join(notesDir,slug,n)).filter(existsSync);assert.ok(files.length<=1,'Note has both index.md and index.mdx: '+slug);const file=files[0];return file?[{slug,draft:/^draft:\s*true\s*(#.*)?\r?$/mi.test(frontmatter(file))}]:[]}):[];
-const published=notes.filter(n=>!n.draft);
-for(const n of notes) assert.ok(!['tags','rss.xml'].includes(n.slug),'Reserved note slug: '+n.slug);
-for(const n of notes) assert.match(n.slug,/^[a-z0-9]+(?:-[a-z0-9]+)*$/,'Note slug must be kebab-case: '+n.slug);
+const site='https://workflows.doruk.uk';
+const frontmatter=text=>(text.match(/^\uFEFF?---\r?\n([\s\S]*?)\r?\n---/)||[,''])[1];
+const sources=existsSync(notesDir)?walk(notesDir).map(p=>relative(notesDir,p).split(sep).join('/')).filter(r=>!r.split('/').some(s=>s.startsWith('.'))).sort():[];
+const sourceErrors=[...sources.flatMap(pathErrors),...urlCollisions(sources)];
+assert.ok(!sourceErrors.length,'Note source errors:\n'+sourceErrors.join('\n'));
+const docs=sources.filter(isDoc).map(rel=>{const text=readFileSync(join(notesDir,rel),'utf8'),fm=frontmatter(text);return {rel,id:noteId(rel),url:noteUrl(rel),readme:isReadme(rel),draft:/^draft:\s*true\s*(#.*)?\r?$/mi.test(fm),body:text.replace(/^\uFEFF?---\r?\n[\s\S]*?\r?\n---/,'')}});
+const published=docs.filter(d=>!d.draft),drafts=docs.filter(d=>d.draft);
+const brokenLinks=published.flatMap(d=>relativeTargets(d.body).map(t=>[t,resolveTarget(d.rel,t)]).filter(([,r])=>r.outside||!existsSync(join(notesDir,r.rel))).map(([t,r])=>d.rel+': link "'+t+'" '+(r.outside?'points outside src/content/notes/':'points to a missing file')));
+assert.ok(!brokenLinks.length,'Broken note links:\n'+brokenLinks.join('\n'));
+const attachments=new Set(published.flatMap(d=>linkedFiles(d.rel,d.body)).filter(r=>!isDoc(r)&&sources.includes(r)));
+const dirsOf=rel=>rel.split('/').slice(0,-1).map((_,i,a)=>a.slice(0,i+1).join('/'));
+const folders=new Set([...published.map(d=>d.rel),...attachments].flatMap(dirsOf));
 assert.ok(existsSync(join(root,'notes/index.html')),'Missing notes index');
 const notesIndex=readFileSync(join(root,'notes/index.html'),'utf8');
-for(const n of published) assert.ok(notesIndex.includes('href="/notes/'+n.slug+'/"'),'Notes index omits '+n.slug);
-for(const n of published) assert.ok(existsSync(join(root,'notes',n.slug,'index.html')),'Missing note page '+n.slug);
-for(const n of notes.filter(n=>n.draft)) assert.ok(!existsSync(join(root,'notes',n.slug)),'Draft note was built: '+n.slug);
 const feed=readFileSync(join(root,'notes/rss.xml'),'utf8');
 const sitemap=readFileSync(join(root,'sitemap.xml'),'utf8');
-for(const n of published){const url='https://workflows.doruk.uk/notes/'+n.slug+'/';assert.ok(feed.includes(url),'RSS omits '+n.slug);assert.ok(sitemap.includes('<loc>'+url+'</loc>'),'Sitemap omits '+n.slug)}
-assert.ok(sitemap.includes('<loc>https://workflows.doruk.uk/notes/</loc>'),'Sitemap omits notes index');
-for(const n of notes.filter(n=>n.draft)){const path='/notes/'+n.slug+'/';assert.ok(!feed.includes(path),'RSS includes draft '+n.slug);assert.ok(!sitemap.includes(path),'Sitemap includes draft '+n.slug)}
-const tagsDir=join(root,'notes/tags');
-for(const tag of existsSync(tagsDir)?readdirSync(tagsDir).filter(t=>statSync(join(tagsDir,t)).isDirectory()):[]) assert.ok(sitemap.includes('<loc>https://workflows.doruk.uk/notes/tags/'+tag+'/</loc>'),'Sitemap omits tag page '+tag);
+const inSitemap=path=>sitemap.includes('<loc>'+site+path+'</loc>');
+const distTexts=walk(root).filter(p=>/\.(html|xml)$/.test(p)).map(p=>readFileSync(p,'utf8'));
+const escapeRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const mentioned=url=>{const re=new RegExp('[">](?:'+escapeRe(site)+')?'+escapeRe(url)+'["<]');return distTexts.some(t=>re.test(t))};
+for(const d of published){
+ assert.ok(notesIndex.includes('data-note="'+d.id+'"'),'Notes index (Latest) omits '+d.rel);
+ assert.ok(notesIndex.includes('href="'+d.url+'"'),'Notes index (Files) omits '+d.rel);
+ assert.ok(existsSync(join(root,d.url,'index.html')),'Missing note page '+d.url+' for '+d.rel);
+ assert.ok(feed.includes('<link>'+site+d.url+'</link>'),'RSS omits '+d.rel);
+ assert.ok(inSitemap(d.url),'Sitemap omits '+d.url);
+}
+for(const dir of folders){const url=folderUrl(dir);assert.ok(existsSync(join(root,url,'index.html')),'Missing folder page '+url);assert.ok(inSitemap(url),'Sitemap omits folder page '+url)}
+for(const rel of sources.filter(r=>!isDoc(r))){
+ const built=join(root,'notes',rel);
+ if(attachments.has(rel)){assert.ok(existsSync(built),'Missing attachment '+noteUrl(rel)+' (each extension needs src/pages/notes/[...file].<ext>.ts)');assert.ok(readFileSync(built).equals(readFileSync(join(notesDir,rel))),'Attachment differs from source: '+rel);assert.ok(notesIndex.includes('href="'+noteUrl(rel)+'"'),'Notes index (Files) omits attachment '+rel)}
+ else assert.ok(!existsSync(built),'Unpublished attachment was built: '+rel);
+}
+for(const d of drafts){
+ assert.ok(!distTexts.some(t=>t.includes('data-note="'+d.id+'"')),'Draft listed: '+d.rel);
+ assert.ok(!feed.includes(site+d.url+'<'),'RSS includes draft '+d.rel);
+ if(d.readme&&folders.has(d.id)) assert.ok(!readFileSync(join(root,d.url,'index.html'),'utf8').includes('data-readme'),'Folder page renders draft README '+d.rel);
+ else{assert.ok(!existsSync(join(root,d.url)),'Draft note was built: '+d.rel);assert.ok(!mentioned(d.url),'Draft URL is linked or listed: '+d.url)}
+}
+for(const dir of new Set(sources.flatMap(dirsOf))) if(!folders.has(dir)){const url=folderUrl(dir);assert.ok(!existsSync(join(root,url)),'Unpublished folder was built: '+url);assert.ok(!mentioned(url),'Unpublished folder is linked or listed: '+url)}
+assert.ok(inSitemap('/notes/'),'Sitemap omits notes index');
+for(const page of walk(root).filter(p=>p.endsWith('.html')&&!/\/(maps|downloads)\//.test(p)&&!p.endsWith('/404.html'))){const path='/'+relative(root,page).split(sep).join('/').replace(/index\.html$/,'');assert.ok(inSitemap(path),'Sitemap omits page '+path)}
 let links=0;
 const files=walk(root).filter(p=>p.endsWith('.html')&&!p.includes('/maps/')&&!p.includes('/downloads/'));
 const refs=walk(root).filter(p=>/\.(html|css|xml|js)$/.test(p)).map(p=>readFileSync(p,'utf8')).join('\n');

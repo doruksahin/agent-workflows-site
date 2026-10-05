@@ -24,7 +24,7 @@ Each cause has a different fix. A trace shows which cause applies to a specific 
 
 ## How it works
 
-![Claude Code sends spans over OTLP to Langfuse, where the UI and CLI read them](./trace-pipeline.svg)
+![Claude Code sends spans over OTLP to Langfuse, where the UI and CLI read them](./images/trace-pipeline.svg)
 
 Claude Code produces the OpenTelemetry spans itself. The runner only sets environment variables, and it sets them for the agent process only. Claude Code sends the spans over OTLP/HTTP to the Langfuse endpoint `/api/public/otel`.
 
@@ -131,7 +131,7 @@ Open the CI run and read the duration of each step. Only the agent step is trace
 
 You can also make the same filter in the filter panel. Set **Latency (s)** to `> 20`. Then add a **Metadata** filter on the key `resourceAttributes.run.ticket`.
 
-![Langfuse observations table with two claude_code.interaction rows and seven claude_code.llm_request rows, each over 20 seconds](./observation-table.jpg)
+![Langfuse observations table with two claude_code.interaction rows and seven claude_code.llm_request rows, each over 20 seconds](./images/01-tracing-search.jpg)
 
 In this deployment, the Tracing table lists observations, not traces. Each run has one `claude_code.interaction` row. The table shows two, because the filter also matches an earlier local run of the same task. All other rows are model requests that took more than 20 s. No tool call took more than 20 s. Thus, the slow parts of this run are model requests, not tools.
 
@@ -141,7 +141,7 @@ The UI shows times in the local time of the browser. The CLI shows UTC.
 
 Click the `claude_code.interaction` row of the run.
 
-![Trace tree: the interaction span at 7m 26s, then model requests and tool calls, each tool call with its permission-wait and execution children](./trace-tree.jpg)
+![Trace tree: the interaction span at 7m 26s, then model requests and tool calls, each tool call with its permission-wait and execution children](./images/02-trace-tree.jpg)
 
 - The `claude_code.interaction` row shows the agent wall time, here `7m 26s`.
 - The metadata shows the resource attributes. The CI run ID connects the trace to the CI run.
@@ -151,7 +151,7 @@ Click the `claude_code.interaction` row of the run.
 
 Select **Timeline** instead of **Tree**. Each bar is one observation on the clock of the run.
 
-![Trace timeline: a staircase of short bars, with one wide bar about three minutes into the run](./trace-timeline.jpg)
+![Trace timeline: a staircase of short bars, with one wide bar about three minutes into the run](./images/03-trace-timeline.jpg)
 
 - **A model-bound run** looks like a staircase of short bars, with some long bars. The long bars are model requests.
 - **A tool-bound run** has one wide tool bar instead. In a different run, two polling loops that the agent wrote took 449 s and 120 s.
@@ -176,7 +176,7 @@ The first token arrived after approximately 1 s. The model used the remaining 99
 
 Select **Tree** again. The selected request stays highlighted. Click the `claude_code.tool` row directly below it, and open **Attributes**.
 
-![Trace tree: after the 1m 40s model request, the next tool call has an execution child marked ERROR](./failed-tool-call.jpg)
+![Trace tree: after the 1m 40s model request, the next tool call has an execution child marked ERROR](./images/05-next-tool-call.jpg)
 
 In the example, the agent wrote a draft of its report in the long request. Then it searched the repository for an example of the report format. The search found nothing, and its execution is marked `ERROR`. Later, the first render of the report failed. The agent edited the report and rendered it again.
 

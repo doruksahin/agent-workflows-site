@@ -1,10 +1,16 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { noteId, pathErrors } from '../scripts/note-paths.mjs';
 
 const tag = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase kebab-case tags');
+const generateId = ({ entry }: { entry: string }) => {
+  const errors = pathErrors(entry);
+  if (errors.length) throw new Error(errors.join('\n'));
+  return noteId(entry);
+};
 const notes = defineCollection({
-  loader: glob({ pattern: '*/index.{md,mdx}', base: './src/content/notes', generateId: ({ entry }) => entry.split('/')[0] }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/notes', generateId }),
   schema: z.object({
     title: z.string().min(1),
     summary: z.string().min(1),
