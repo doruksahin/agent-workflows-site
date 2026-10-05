@@ -1,2 +1,3 @@
 import { defineConfig } from 'astro/config';
-export default defineConfig({ site: 'https://workflows.doruk.uk', output: 'static', trailingSlash: 'always' });
+import mdx from '@astrojs/mdx';
+export default defineConfig({ site: 'https://workflows.doruk.uk', output: 'static', trailingSlash: 'always', integrations: [mdx()] });
