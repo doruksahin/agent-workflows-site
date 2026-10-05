@@ -8,8 +8,9 @@
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1",
     "test": "node --test \"scripts/*.test.mjs\"",
-    "verify": "npm test && npm run build && node scripts/check-site.mjs"
+    "verify": "pnpm test && pnpm build && node scripts/check-site.mjs"
   },
+  "packageManager": "pnpm@11.27.0",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -17,6 +18,7 @@
     "@astrojs/markdown-satteri": "0.4.1",
     "@astrojs/mdx": "8.0.2",
     "@astrojs/rss": "4.0.19",
-    "astro": "7.3.3"
+    "astro": "7.3.3",
+    "sharp": "0.35.4"
   }
 }
