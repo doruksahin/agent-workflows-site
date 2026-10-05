@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview --host 127.0.0.1",
     "test": "node --test \"scripts/*.test.mjs\"",
-    "verify": "pnpm test && pnpm build && node scripts/check-site.mjs"
+    "verify": "pnpm test && pnpm build && node scripts/check-site.mjs",
+    "sync:kb": "node scripts/sync-knowledge-base.mjs"
   },
   "packageManager": "pnpm@11.27.0",
   "engines": {
@@ -19,6 +20,7 @@
     "@astrojs/mdx": "8.0.2",
     "@astrojs/rss": "4.0.19",
     "astro": "7.3.3",
+    "mermaid": "11.17.2",
     "sharp": "0.35.4"
   }
 }

@@ -19,6 +19,8 @@ const knowledgeBase = defineCollection({
     tags: z.array(tag).min(1).refine(t => new Set(t).size === t.length, 'Duplicate tag'),
     source: z.string().optional(),
     draft: z.boolean().default(false),
+    // Synced from a source folder (scripts/sync-knowledge-base.mjs): the page shows the Markdown only.
+    verbatim: z.boolean().default(false),
   }),
 });
 export const collections = { knowledgeBase };

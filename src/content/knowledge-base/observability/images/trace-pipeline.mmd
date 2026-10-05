@@ -1,5 +1,0 @@
-flowchart TB
-  A["Your runner<br/>(agent step)"] -->|"OTEL_* for this process only"| B["claude --print<br/>(native OpenTelemetry)"]
-  B -->|"OTLP/HTTP, every 1 s"| C["Langfuse<br/>/api/public/otel"]
-  C --> D["Langfuse UI"]
-  C --> E["langfuse-cli"]

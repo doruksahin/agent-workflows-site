@@ -38,7 +38,7 @@ permissions.
 - `src/content/knowledge-base/<folder>/`: dated entries with tags, in the folder structure of their
   source. Copy a source folder as it is, then make it generic. File and folder names keep
   their source spelling, but each name must be URL-safe (`A-Z a-z 0-9 . _ -`). Each
-  `.md` or `.mdx` file is one page, and `README.md` is the folder's own page. Relative
+  `.md` or `.mdx` file is one page, including `README.md`; a folder URL lists its files. Relative
   `.md` links and attachment links are rewritten to site URLs at build time. A link to a
   missing file, or to a file outside `src/content/knowledge-base/`, fails the build. An attachment
   is served only when a published file links to it or embeds it. The allowed attachment
@@ -51,6 +51,14 @@ permissions.
   `npx -y @mermaid-js/mermaid-cli@11 -c scripts/mermaid.config.json -i <in.mmd> -o <out.svg>`.
   `pnpm verify` rejects private details that match `scripts/disclosure-rules.json`.
   The scan is only a safety net: review the screenshots and text yourself.
+- Synced folders: a folder listed in `scripts/knowledge-base-sources.json` is a verbatim copy of a
+  private source folder. Do not edit it here; change the source, then run `pnpm sync:kb [folder]`
+  on a machine that has the source checkout. The sync replaces the folder and copies each file
+  as it is, except that each disclosure-rule match becomes a black bar (`████`) and links that
+  are private or leave the folder become plain text. It adds frontmatter with `verbatim: true`
+  (title from the `# heading`, summary from the first paragraph, dates from the source's Git
+  history). A `verbatim` page shows only the Markdown body: no date, lead, tags, source line, or
+  folder listing. Mermaid blocks are drawn in the browser. Images are copied unchanged.
 - `src/pages/about.astro`: editorial scope and source policy.
 - `src/components/`: reusable tool cards, icons, and visual workflow steps.
 - `src/pages/map.astro`: the full-page map and expandable GitHub references.
