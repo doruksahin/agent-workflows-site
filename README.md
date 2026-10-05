@@ -22,7 +22,7 @@ npm run dev
 npm run verify
 ```
 
-Runs the unit tests, builds the site, and checks local link targets, source provenance, referenced tool relationships, and the included map checksum. It also checks the notes pages, RSS feed, sitemap, draft exclusion, note slugs, unreferenced assets, and private details in note files. Production output is in `dist/`.
+Runs the unit tests, builds the site, and checks local link targets, source provenance, referenced tool relationships, and the included map checksum. It also checks the notes pages, RSS feed, sitemap, draft exclusion, note paths and links, published attachments, unreferenced assets, and private details in note files. Production output is in `dist/`.
 
 The **Verify** GitHub Actions workflow runs these checks on pull requests and manual
 dispatches. **Release Please** reuses the same check on pushes to `main` before
@@ -34,11 +34,19 @@ permissions.
 
 - `src/data/tools.json`: tool explanations and reviewed source references.
 - `src/pages/guides/*.md`: Markdown walkthroughs with inline source links.
-- `src/content/notes/<slug>/index.mdx`: dated notes with tags. The folder name is the
-  URL, in kebab-case. Put attachments beside the note. Use a date-only `YYYY-MM-DD`
-  value for `date` and `updated`; a time with an offset can show a different day.
-  `draft: true` keeps a note out of production. Render Mermaid sources to committed
-  SVG files with
+- `src/content/notes/<folder>/`: dated notes with tags, in the folder structure of their
+  source. Copy a source folder as it is, then make it generic. File and folder names keep
+  their source spelling, but each name must be URL-safe (`A-Z a-z 0-9 . _ -`). Each
+  `.md` or `.mdx` file is one page, and `README.md` is the folder's own page. Relative
+  `.md` links and attachment links are rewritten to site URLs at build time. A link to a
+  missing file, or to a file outside `src/content/notes/`, fails the build. An attachment
+  is served only when a published file links to it or embeds it. The allowed attachment
+  extensions are `jpg`, `png`, `webp`, `gif`, `svg`, and `pdf`; to add one, add
+  `src/pages/notes/[...file].<ext>.ts`. Use a date-only `YYYY-MM-DD` value for `date`
+  and `updated`; a time with an offset can show a different day. `draft: true` keeps a
+  file out of production. A draft that contains images fails `npm run verify`, because
+  Astro still emits its images: keep the images out of a draft until you publish it.
+  Render Mermaid sources to committed SVG files next to them with
   `npx -y @mermaid-js/mermaid-cli@11 -c scripts/mermaid.config.json -i <in.mmd> -o <out.svg>`.
   `npm run verify` rejects private details that match `scripts/disclosure-rules.json`.
   The scan is only a safety net: review the screenshots and text yourself.

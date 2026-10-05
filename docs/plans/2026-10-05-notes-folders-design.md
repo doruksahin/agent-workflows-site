@@ -37,15 +37,20 @@ src/content/notes/<folder>/<sub>/<file>.<ext>    attachments, such as images/
 
 ## Links
 
-A remark plugin rewrites relative links at build time, so the copied files keep their source
-links:
+A Markdown plugin rewrites relative links at build time, so the copied files keep their source
+links. As built, it is a Sätteri mdast plugin, `scripts/note-links.mjs`, because Sätteri is the
+default Markdown and MDX processor in Astro 7. Its `astro.config.mjs` import needs a direct pin of
+`@astrojs/markdown-satteri`.
 
 - `diagnose-with-cli.md#step-2` becomes `/notes/observability/diagnose-with-cli/#step-2`.
 - `README.md` becomes the folder URL.
 - A link to an attachment becomes its stable attachment URL.
 - Relative image references stay with the Astro image pipeline, which makes optimized copies.
 - A relative link to a file that does not exist, or that is outside `src/content/notes/`, fails
-  the build. Example: a link to a private ADR that was not copied.
+  the build. Example: a link to a private ADR that was not copied. As built, the glob loader
+  only logs a render error in a `.md` file and continues. Two checks enforce the rule instead:
+  `src/pages/notes/[...path].astro` fails the build for a `.md` file that did not render, and
+  `check-site.mjs` asserts that no published file has a broken or outside relative link.
 
 ## Routes and views
 
@@ -58,6 +63,11 @@ links:
 | `/notes/tags/<tag>/`, `/notes/rss.xml` | Unchanged. They list files. |
 
 On phones, the tree goes into a collapsible section above the content.
+
+As built, attachments use one route for each extension, `src/pages/notes/[...file].<ext>.ts`, not
+one `[...file].ts` route. In development, Astro exempts an endpoint from
+`trailingSlash: 'always'` only when its route name ends in a literal extension. The served
+extensions are `jpg`, `png`, `webp`, `gif`, `svg`, and `pdf`.
 
 ## Attachments and drafts
 

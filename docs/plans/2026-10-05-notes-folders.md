@@ -8,8 +8,18 @@ view under `/notes/`.
 **Architecture:** The glob loader reads every `**/*.{md,mdx}` file under `src/content/notes/`.
 The ID is the path, and a README maps to its folder. `src/lib/notes.ts` builds a tree of folders,
 files, and attachments that a published file refers to. A catch-all route renders folder pages and
-file pages. An endpoint copies the published attachments to stable URLs. A remark plugin rewrites
-relative links. `check-site.mjs` gets red/green checks for each rule.
+file pages. An endpoint copies the published attachments to stable URLs. A Sätteri mdast plugin
+rewrites relative links. `check-site.mjs` gets red/green checks for each rule.
+
+**Deviations, as built (Task 1):**
+- The link rewriter is a Sätteri mdast plugin, `scripts/note-links.mjs`, not a remark plugin.
+  Sätteri is Astro 7's default Markdown processor. `astro.config.mjs` imports it, so
+  `@astrojs/markdown-satteri` has a direct pin in `package.json`.
+- Attachments use one route for each extension, `src/pages/notes/[...file].<ext>.ts`, with shared
+  code in `_attachments.ts`. In development, only an endpoint whose route name ends in a literal
+  extension is exempt from `trailingSlash: 'always'`.
+- The glob loader only logs a broken link in a `.md` file. A render check in
+  `src/pages/notes/[...path].astro` and an assertion in `check-site.mjs` make it fail the build.
 
 **Design:** [2026-10-05-notes-folders-design.md](2026-10-05-notes-folders-design.md)
 
@@ -32,9 +42,9 @@ code. Check exit statuses with `echo $?`. Use Conventional Commits.
   `src/pages/notes/rss.xml.ts`, `src/pages/notes/tags/[tag].astro`, `src/pages/sitemap.xml.ts`,
   `scripts/check-site.mjs`, `src/styles/global.css`
 - Create: `src/pages/notes/[...path].astro` (replaces `[slug].astro`),
-  `src/pages/notes/[...file].ts` (attachments), `src/components/NoteTree.astro`,
-  `scripts/remark-note-links.mjs`
-- Test: `scripts/remark-note-links.test.mjs`, which is a unit test of the URL mapping and the link
+  `src/pages/notes/[...file].<ext>.ts` and `_attachments.ts` (attachments),
+  `src/components/NoteTree.astro`, `scripts/note-paths.mjs`, `scripts/note-links.mjs`
+- Test: `scripts/note-links.test.mjs`, which is a unit test of the URL mapping and the link
   rewrite
 
 **Steps:**
