@@ -1,9 +1,9 @@
 ---
-import NotesFrame from './NotesFrame.astro';
+import KnowledgeBaseFrame from './KnowledgeBaseFrame.astro';
 import ImageViewer from '../components/ImageViewer.astro';
-import { formatDate, type Note, type TreeFolder } from '../lib/notes';
+import { formatDate, type Note, type TreeFolder } from '../lib/entries';
 interface Props { tree: TreeFolder; current: string; crumbs: { name: string; url: string }[]; title: string; description: string; note?: Note }
 const { tree, current, crumbs, title, description, note } = Astro.props;
 const d = note?.data;
 ---
-<NotesFrame tree={tree} current={current} title={title} description={description}><article class="note-main"><header class="page-head"><div class="breadcrumb note-crumbs">{crumbs.map((c, i) => <>{i > 0 && ' / '}<a href={c.url} aria-current={i === crumbs.length - 1 ? 'page' : undefined}>{c.name}</a></>)}</div>{d && <div class="eyebrow"><time datetime={d.date.toISOString()}>{formatDate(d.date)}</time>{d.updated && <> · Updated <time datetime={d.updated.toISOString()}>{formatDate(d.updated)}</time></>}</div>}<h1>{title}</h1><p class="lead">{description}</p>{d && <div class="tag-list">{d.tags.map(t => <a class="badge" href={`/notes/tags/${t}/`}>{t}</a>)}</div>}</header><slot name="listing" />{d && <div class="prose" data-readme={Astro.slots.has('listing') ? '' : undefined}><slot />{d.source && <p class="reference-note">Source: {d.source}</p>}</div>}</article><ImageViewer slot="after" /></NotesFrame>
+<KnowledgeBaseFrame tree={tree} current={current} title={title} description={description}><article class="note-main"><header class="page-head"><div class="breadcrumb note-crumbs">{crumbs.map((c, i) => <>{i > 0 && ' / '}<a href={c.url} aria-current={i === crumbs.length - 1 ? 'page' : undefined}>{c.name}</a></>)}</div>{d && <div class="eyebrow"><time datetime={d.date.toISOString()}>{formatDate(d.date)}</time>{d.updated && <> · Updated <time datetime={d.updated.toISOString()}>{formatDate(d.updated)}</time></>}</div>}<h1>{title}</h1><p class="lead">{description}</p>{d && <div class="tag-list">{d.tags.map(t => <a class="badge" href={`/knowledge-base/tags/${t}/`}>{t}</a>)}</div>}</header><slot name="listing" />{d && <div class="prose" data-readme={Astro.slots.has('listing') ? '' : undefined}><slot />{d.source && <p class="reference-note">Source: {d.source}</p>}</div>}</article><ImageViewer slot="after" /></KnowledgeBaseFrame>

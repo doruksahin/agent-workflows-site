@@ -1,0 +1,9 @@
+---
+import KnowledgeBaseFrame from '../../layouts/KnowledgeBaseFrame.astro';
+import NoteList from '../../components/NoteList.astro';
+import { publishedEntries, noteTags, noteTree } from '../../lib/entries';
+const entries = await publishedEntries();
+---
+<KnowledgeBaseFrame tree={noteTree(entries)} title="Knowledge base" description="Learned experience from building and running agent workflows: setups, diagnoses, and what worked."><div class="page-head"><h1 class="kb-title">Knowledge base</h1><div class="tag-list">{noteTags(entries).map(t => <a class="badge" href={`/knowledge-base/tags/${t}/`} data-tag={t}>{t}</a>)}</div></div>
+<section id="latest" aria-label="Latest entries"><NoteList entries={entries} /></section>
+<script is:inline>(()=>{const tags=[...document.querySelectorAll('.tag-list [data-tag]')],cards=[...document.querySelectorAll('#latest [data-tags]')],known=tags.map(t=>t.dataset.tag),on=new Set((new URLSearchParams(location.search).get('tags')||'').split(',').filter(t=>known.includes(t)));const apply=()=>{for(const t of tags)t.setAttribute('aria-pressed',on.has(t.dataset.tag));for(const c of cards){const own=c.dataset.tags.split(' ');c.hidden=![...on].every(t=>own.includes(t));for(const b of c.querySelectorAll('[data-row-tag]'))b.toggleAttribute('data-selected',on.has(b.dataset.rowTag))}for(const g of document.querySelectorAll('.note-group'))g.hidden=![...g.querySelectorAll('[data-tags]')].some(r=>!r.hidden);const q=new URLSearchParams(location.search);on.size?q.set('tags',[...on].join(',')):q.delete('tags');const qs=q.toString();history.replaceState(null,'',location.pathname+(qs?'?'+qs.replace(/%2C/g,','):'')+location.hash)};for(const t of tags)t.addEventListener('click',e=>{e.preventDefault();const k=t.dataset.tag;on.has(k)?on.delete(k):on.add(k);apply()});apply()})();</script></KnowledgeBaseFrame>

@@ -1,5 +1,5 @@
 ---
-import type { TreeFolder } from '../lib/notes';
+import type { TreeFolder } from '../lib/entries';
 interface Props { dir: TreeFolder; current?: string; searchable?: boolean }
 const { dir, current, searchable } = Astro.props;
 const here = (url: string) => url === current ? 'page' : undefined;

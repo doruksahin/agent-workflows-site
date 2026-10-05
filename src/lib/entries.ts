@@ -5,27 +5,27 @@ import { getImage } from 'astro:assets';
 import { imageMetadata } from 'astro/assets/utils';
 import { folderUrl, isDoc, isImage, isReadme, linkedFiles, noteUrl, viewUrl } from '../../scripts/note-paths.mjs';
 
-export type Note = CollectionEntry<'notes'>;
-export const notesDir = 'src/content/notes';
-export async function publishedNotes(): Promise<Note[]> {
-  const notes = await getCollection('notes', ({ data }) => import.meta.env.DEV || !data.draft);
-  return notes.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf() || a.id.localeCompare(b.id));
+export type Note = CollectionEntry<'knowledgeBase'>;
+export const entriesDir = 'src/content/knowledge-base';
+export async function publishedEntries(): Promise<Note[]> {
+  const entries = await getCollection('knowledgeBase', ({ data }) => import.meta.env.DEV || !data.draft);
+  return entries.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf() || a.id.localeCompare(b.id));
 }
-export const noteTags = (notes: Note[]) => [...new Set(notes.flatMap(n => n.data.tags))].sort();
+export const noteTags = (entries: Note[]) => [...new Set(entries.flatMap(n => n.data.tags))].sort();
 export const formatDate = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-/** Notes grouped by calendar day, in the order given. */
-export function groupByDate(notes: Note[]) {
-  const groups: { label: string; date: Date; notes: Note[] }[] = [];
-  for (const note of notes) {
+/** Knowledge base grouped by calendar day, in the order given. */
+export function groupByDate(entries: Note[]) {
+  const groups: { label: string; date: Date; entries: Note[] }[] = [];
+  for (const note of entries) {
     const label = formatDate(note.data.date);
     const last = groups[groups.length - 1];
-    if (last?.label === label) last.notes.push(note);
-    else groups.push({ label, date: note.data.date, notes: [note] });
+    if (last?.label === label) last.entries.push(note);
+    else groups.push({ label, date: note.data.date, entries: [note] });
   }
   return groups;
 }
-/** Source path under src/content/notes/, such as observability/README.mdx. */
-export const noteSource = (note: Note) => note.filePath!.slice(notesDir.length + 1);
+/** Source path under src/content/knowledge-base/, such as observability/README.mdx. */
+export const noteSource = (note: Note) => note.filePath!.slice(entriesDir.length + 1);
 export const notePath = (note: Note) => noteUrl(noteSource(note));
 export const noteFolder = (note: Note) => noteSource(note).split('/').slice(0, -1).join('/');
 
@@ -33,8 +33,8 @@ export const noteFolder = (note: Note) => noteSource(note).split('/').slice(0, -
 export type TreeFile = { kind: 'doc' | 'file'; name: string; rel: string; url: string; href: string; note?: Note; usedIn: { name: string; url: string }[] };
 export type TreeFolder = { kind: 'folder'; name: string; rel: string; url: string; children: (TreeFolder | TreeFile)[]; readme?: Note };
 /** Published Markdown files plus the attachments they link to or embed, as source-named folders. */
-export function noteTree(notes: Note[]): TreeFolder {
-  const root: TreeFolder = { kind: 'folder', name: 'notes', rel: '', url: folderUrl(''), children: [] };
+export function noteTree(entries: Note[]): TreeFolder {
+  const root: TreeFolder = { kind: 'folder', name: 'knowledge-base', rel: '', url: folderUrl(''), children: [] };
   const folder = (rel: string): TreeFolder => rel.split('/').reduce((dir, name, i, parts) => {
     const path = parts.slice(0, i + 1).join('/');
     let next = dir.children.find((c): c is TreeFolder => c.kind === 'folder' && c.name === name);
@@ -47,12 +47,12 @@ export function noteTree(notes: Note[]): TreeFolder {
     if (!file) dir.children.push(file = { kind, name: rel.split('/').pop()!, rel, url: noteUrl(rel), href: viewUrl(rel), note, usedIn: [] });
     return { dir, file };
   };
-  for (const note of notes) {
+  for (const note of entries) {
     const rel = noteSource(note);
     const { dir } = add(rel, 'doc', note);
     if (isReadme(rel)) dir.readme = note;
     for (const target of new Set(linkedFiles(rel, note.body ?? '')))
-      if (!isDoc(target) && existsSync(join(notesDir, target)) && statSync(join(notesDir, target)).isFile()) add(target, 'file').file.usedIn.push({ name: rel.split('/').pop()!, url: noteUrl(rel) });
+      if (!isDoc(target) && existsSync(join(entriesDir, target)) && statSync(join(entriesDir, target)).isFile()) add(target, 'file').file.usedIn.push({ name: rel.split('/').pop()!, url: noteUrl(rel) });
   }
   const sort = (dir: TreeFolder) => { dir.children.sort((a, b) => Number(b.kind === 'folder') - Number(a.kind === 'folder') || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)); dir.children.forEach(c => c.kind === 'folder' && sort(c)); };
   sort(root);
@@ -62,16 +62,16 @@ export const treeFolders = (dir: TreeFolder): TreeFolder[] => [dir, ...dir.child
 export const treeAttachments = (dir: TreeFolder): TreeFile[] => treeFolders(dir).flatMap(d => d.children.filter((c): c is TreeFile => c.kind === 'file'));
 
 export type GalleryImage = { file: TreeFile; meta: string; format: string; thumb: { src: string; width?: number; height?: number } };
-const rasters = import.meta.glob<{ default: ImageMetadata }>('/src/content/notes/**/*.{gif,jpg,png,webp}');
+const rasters = import.meta.glob<{ default: ImageMetadata }>('/src/content/knowledge-base/**/*.{gif,jpg,png,webp}');
 const fileSize = (bytes: number) => bytes < 1024 ? `${bytes} B` : bytes < 1024 * 1024 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 /** The published images in a folder, with build-time dimensions, size, and an optimized thumbnail (the raw SVG for an SVG). */
 export async function galleryImages(dir: TreeFolder): Promise<GalleryImage[]> {
   const files = dir.children.filter((c): c is TreeFile => c.kind === 'file' && isImage(c.rel));
   return Promise.all(files.map(async file => {
-    const data = readFileSync(join(notesDir, file.rel));
+    const data = readFileSync(join(entriesDir, file.rel));
     const { width, height, format } = await imageMetadata(data, file.rel).catch(() => ({ width: undefined, height: undefined, format: file.rel.split('.').pop()! }));
     const meta = [width && height ? `${width}×${height}` : 'SVG', fileSize(data.length)].join(' · ');
-    const load = rasters[`/${notesDir}/${file.rel}`];
+    const load = rasters[`/${entriesDir}/${file.rel}`];
     const thumb = load ? await getImage({ src: (await load()).default, width: Math.min(480, width ?? 480), format: 'webp' }) : null;
     return { file, meta, format: format.toUpperCase(), thumb: thumb ? { src: thumb.src, width: Number(thumb.attributes.width), height: Number(thumb.attributes.height) } : { src: file.url, width, height } };
   }));

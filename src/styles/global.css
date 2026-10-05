@@ -21,9 +21,9 @@ html:has(.drawer[open]){overflow:hidden}
 @keyframes drawer-in{from{translate:-100% 0}to{translate:0 0}}
 @media(prefers-reduced-motion:reduce){.drawer[open]{animation:none}}
 .note-bar{padding-top:28px}
-.notes-content .page-head{padding-block:22px 26px}
-.notes-title{font-size:clamp(30px,3.4vw,42px);line-height:1.15;margin:0 0 16px}
-.notes-content .tag-list{margin-top:0}
+.kb-content .page-head{padding-block:22px 26px}
+.kb-title{font-size:clamp(30px,3.4vw,42px);line-height:1.15;margin:0 0 16px}
+.kb-content .tag-list{margin-top:0}
 
 .note-group{display:grid;grid-template-columns:170px minmax(0,1fr);gap:0 32px;padding-block:10px;border-top:1px solid var(--line)}
 .note-group[hidden],.note-row[hidden]{display:none}

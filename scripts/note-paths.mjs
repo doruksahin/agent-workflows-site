@@ -1,4 +1,4 @@
-// URL rules for src/content/notes/. The loader, the routes, the link plugin, and check-site use only these.
+// URL rules for src/content/knowledge-base/. The loader, the routes, the link plugin, and check-site use only these.
 import { posix } from 'node:path';
 
 export const SAFE_SEGMENT = /^[A-Za-z0-9._-]+$/;
@@ -8,9 +8,9 @@ export const isReadme = rel => /^README\.mdx?$/.test(posix.basename(rel));
 const parent = rel => posix.dirname(rel).replace(/^\.$/, '');
 /** Collection ID: the path without extension; a README is its folder. */
 export const noteId = rel => isReadme(rel) ? parent(rel) : rel.replace(/\.mdx?$/, '');
-export const folderUrl = dir => dir ? `/notes/${dir}/` : '/notes/';
+export const folderUrl = dir => dir ? `/knowledge-base/${dir}/` : '/knowledge-base/';
 /** Page URL for a Markdown file, raw URL for an attachment. */
-export const noteUrl = rel => isDoc(rel) ? folderUrl(noteId(rel)) : `/notes/${rel}`;
+export const noteUrl = rel => isDoc(rel) ? folderUrl(noteId(rel)) : `/knowledge-base/${rel}`;
 /** Image extensions that have a raw route and open in the folder gallery's viewer. */
 export const isImage = rel => /\.(?:gif|jpg|png|svg|webp)$/.test(rel);
 /** Link in the file tree and folder listings: the folder gallery's deep link for an image in a folder, else noteUrl. */
@@ -18,7 +18,7 @@ export const viewUrl = rel => isImage(rel) && parent(rel) ? `${folderUrl(parent(
 
 export function pathErrors(rel) {
   const errors = rel.split('/').filter(s => !SAFE_SEGMENT.test(s)).map(s => `Unsafe path segment "${s}" in ${rel}: use A-Z a-z 0-9 . _ -`);
-  if (isDoc(rel) && isReadme(rel) && !parent(rel)) errors.push(`README at the notes root: ${rel} (/notes/ is the index)`);
+  if (isDoc(rel) && isReadme(rel) && !parent(rel)) errors.push(`README at the knowledge base root: ${rel} (/knowledge-base/ is the index)`);
   const first = (isDoc(rel) ? noteId(rel) : rel).split('/')[0];
   if (RESERVED_ROOT.includes(first)) errors.push(`Reserved root name "${first}" in ${rel}`);
   return errors;

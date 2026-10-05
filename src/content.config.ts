@@ -9,8 +9,8 @@ const generateId = ({ entry }: { entry: string }) => {
   if (errors.length) throw new Error(errors.join('\n'));
   return noteId(entry);
 };
-const notes = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/notes', generateId }),
+const knowledgeBase = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/knowledge-base', generateId }),
   schema: z.object({
     title: z.string().min(1),
     summary: z.string().min(1),
@@ -21,4 +21,4 @@ const notes = defineCollection({
     draft: z.boolean().default(false),
   }),
 });
-export const collections = { notes };
+export const collections = { knowledgeBase };

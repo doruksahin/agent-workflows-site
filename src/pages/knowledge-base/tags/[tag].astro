@@ -1,0 +1,12 @@
+---
+import KnowledgeBaseFrame from '../../../layouts/KnowledgeBaseFrame.astro';
+import NoteList from '../../../components/NoteList.astro';
+import { publishedEntries, noteTags, noteTree } from '../../../lib/entries';
+export async function getStaticPaths() {
+  const entries = await publishedEntries();
+  return noteTags(entries).map(tag => ({ params: { tag }, props: { entries: entries.filter(n => n.data.tags.includes(tag)), tree: noteTree(entries) } }));
+}
+const { tag } = Astro.params;
+const { entries, tree } = Astro.props;
+---
+<KnowledgeBaseFrame tree={tree} title={`Knowledge base: ${tag}`} description={`Knowledge base entries about ${tag} from building and running agent workflows.`}><div class="page-head"><div class="breadcrumb"><a href="/knowledge-base/">Knowledge base</a> / Tag</div><h1>{tag}</h1><p class="lead">{entries.length} {entries.length === 1 ? 'entry' : 'entries'}.</p></div><NoteList entries={entries} /></KnowledgeBaseFrame>

@@ -2,8 +2,8 @@
 import Base from './Base.astro';
 import FilesButton from '../components/FilesButton.astro';
 import FilesDrawer from '../components/FilesDrawer.astro';
-import type { TreeFolder } from '../lib/notes';
+import type { TreeFolder } from '../lib/entries';
 interface Props { tree: TreeFolder; current?: string; title: string; description: string }
 const { tree, current, title, description } = Astro.props;
 ---
-<Base title={title} description={description}><div class="shell"><div class="note-bar"><FilesButton /></div><div class="notes-content"><slot /></div></div><FilesDrawer dir={tree} current={current} /><slot name="after" /></Base>
+<Base title={title} description={description}><div class="shell"><div class="note-bar"><FilesButton /></div><div class="kb-content"><slot /></div></div><FilesDrawer dir={tree} current={current} /><slot name="after" /></Base>
