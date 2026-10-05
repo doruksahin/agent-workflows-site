@@ -38,3 +38,4 @@ html:has(.drawer[open]){overflow:hidden}
 
 body:not(.immersive){min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 body:not(.immersive)>main{flex:1 0 auto}
+.kb-content .verbatim-head{padding-bottom:0}.prose.verbatim>h1:first-child{font-size:clamp(36px,4.5vw,52px);margin:0 0 28px}.mermaid-figure{margin:28px 0;overflow-x:auto}.mermaid-figure svg{max-width:100%;height:auto}

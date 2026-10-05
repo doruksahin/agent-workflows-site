@@ -25,7 +25,7 @@ const images = folder ? await galleryImages(folder) : [];
 const others = folder ? folder.children.filter(c => !(c.kind === 'file' && isImage(c.rel))) : [];
 ---
 <Note tree={tree} current={Astro.url.pathname} crumbs={crumbs} title={title} description={description} note={note}>
-  {folder && <Fragment slot="listing">
+  {folder && !note?.data.verbatim && <Fragment slot="listing">
     {images.length > 0 && <ul class="gallery" aria-label="Images">{images.map(({ file, meta, format, thumb }) => <li id={file.name}><a class="gallery-card" href={file.url} data-viewer-item data-name={file.name} data-meta={meta}><img src={thumb.src} width={thumb.width} height={thumb.height} alt="" loading="lazy" decoding="async" /><span class="gallery-name">{file.name}</span><span class="gallery-meta"><span class="badge">{format}</span><span>{meta}</span></span></a><template>{file.usedIn.map(u => <a href={u.url}>{u.name}</a>)}</template></li>)}</ul>}
     {others.length > 0 && <ul class="note-list">{others.map(c => <li><a href={c.kind === 'folder' ? c.url : c.href}>{c.name}{c.kind === 'folder' && '/'}</a><span>{c.kind === 'folder' ? 'Folder' : c.kind === 'doc' ? c.note!.data.title : c.name.split('.').pop()!.toUpperCase()}</span></li>)}</ul>}
   </Fragment>}

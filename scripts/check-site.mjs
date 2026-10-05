@@ -62,7 +62,8 @@ let links=0;
 const files=walk(root).filter(p=>p.endsWith('.html')&&!p.includes('/maps/')&&!p.includes('/downloads/'));
 const refs=walk(root).filter(p=>/\.(html|css|xml|js)$/.test(p)).map(p=>readFileSync(p,'utf8')).join('\n');
 const assets=existsSync(join(root,'_astro'))?readdirSync(join(root,'_astro')):[];
-const referenced=a=>refs.includes('/_astro/'+a);
+// A lazy chunk (such as a Mermaid diagram type) is referenced by its sibling chunks as "_astro/x.js" or "./x.js".
+const referenced=a=>refs.includes('/_astro/'+a)||refs.includes('"_astro/'+a)||refs.includes('./'+a);
 // Astro also emits an unreferenced original beside each transformed SVG: x.HASH.svg next to x.HASH_HASH2.svg.
 const transformedSibling=a=>{const ext=a.match(/\.[^.]+$/)?.[0]??'',stem=a.slice(0,a.length-ext.length);return assets.some(b=>b!==a&&b.startsWith(stem+'_')&&b.endsWith(ext)&&referenced(b))};
 for(const a of assets) assert.ok(referenced(a)||transformedSibling(a),'Unreferenced build asset (draft attachment?) '+a);
