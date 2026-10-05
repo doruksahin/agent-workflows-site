@@ -4,8 +4,8 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { noteId, noteUrl, folderUrl, pathErrors, urlCollisions, relativeTargets, linkedFiles } from './note-paths.mjs';
-import noteLinks from './note-links.mjs';
+import { noteId, noteUrl, folderUrl, viewUrl, isImage, pathErrors, urlCollisions, relativeTargets, linkedFiles } from './note-paths.mjs';
+import noteLinks, { noteImages } from './note-links.mjs';
 
 test('maps source paths to IDs and URLs, with a README as its folder', () => {
   assert.equal(noteId('observability/README.mdx'), 'observability');
@@ -16,6 +16,14 @@ test('maps source paths to IDs and URLs, with a README as its folder', () => {
   assert.equal(noteUrl('observability/images/02-trace-tree.jpg'), '/notes/observability/images/02-trace-tree.jpg');
   assert.equal(folderUrl('observability/images'), '/notes/observability/images/');
   assert.equal(folderUrl(''), '/notes/');
+});
+test('links an image to its folder gallery, and other files to their page or raw URL', () => {
+  assert.ok(['a.jpg', 'a.png', 'a.gif', 'a.webp', 'a.svg'].every(isImage));
+  assert.ok(!['a.pdf', 'a.mmd', 'a.md', 'a.jpeg'].some(isImage), 'only extensions with a raw route are images');
+  assert.equal(viewUrl('observability/images/02-trace-tree.jpg'), '/notes/observability/images/#02-trace-tree.jpg');
+  assert.equal(viewUrl('x.svg'), '/notes/x.svg', 'the notes index has no gallery');
+  assert.equal(viewUrl('observability/files/report.pdf'), '/notes/observability/files/report.pdf');
+  assert.equal(viewUrl('observability/diagnose-with-cli.md'), '/notes/observability/diagnose-with-cli/');
 });
 test('rejects unsafe segments, a root README, and reserved root names', () => {
   assert.deepEqual(pathErrors('observability/diagnose-with-cli.md'), []);
@@ -65,5 +73,19 @@ test('fails on missing targets and targets outside the notes folder; skips other
     assert.throws(() => rewrite(dir, 'o/cli.md', ['../../outside.md']), /o\/cli.md: link "..\/..\/outside.md" points outside src\/content\/notes\//);
     assert.equal(plugin(dir, '../elsewhere.md'), null);
     assert.equal(noteLinks({ notesDir: dir })({ fileURL: undefined }), null);
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+});
+test('marks relative note images with their raw attachment URL for the viewer', () => {
+  const dir = fixture();
+  try {
+    const images = from => noteImages({ notesDir: dir })({ fileURL: pathToFileURL(join(dir, from)) });
+    const mark = (from, src) => { const node = { type: 'element', tagName: 'img', properties: { src } }; images(from).element.visit(node, ctx); return node['data-raw'] };
+    assert.deepEqual(images('o/cli.md').element.filter, ['img']);
+    assert.equal(mark('o/cli.md', './images/x.jpg'), '/notes/o/images/x.jpg');
+    assert.equal(mark('o/README.md', 'images/x.jpg'), '/notes/o/images/x.jpg');
+    assert.equal(mark('o/cli.md', 'https://e.com/x.jpg'), undefined);
+    assert.equal(mark('o/cli.md', '/favicon.svg'), undefined);
+    assert.equal(mark('o/cli.md', '../../outside.jpg'), undefined);
+    assert.equal(noteImages({ notesDir: dir })({ fileURL: pathToFileURL(join(dir, '../elsewhere.md')) }), null);
   } finally { rmSync(dir, { recursive: true, force: true }) }
 });

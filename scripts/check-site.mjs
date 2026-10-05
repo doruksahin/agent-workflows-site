@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { resolve, join, relative, sep } from 'node:path';
 import assert from 'node:assert/strict';
 import { loadRules, scanText } from './disclosure.mjs';
-import { noteId, noteUrl, folderUrl, isDoc, isReadme, pathErrors, urlCollisions, linkedFiles, relativeTargets, resolveTarget } from './note-paths.mjs';
+import { noteId, noteUrl, folderUrl, viewUrl, isDoc, isReadme, pathErrors, urlCollisions, linkedFiles, relativeTargets, resolveTarget } from './note-paths.mjs';
 const root=resolve('dist');
 const walk=dir=>readdirSync(dir).flatMap(n=>{const p=join(dir,n);return statSync(p).isDirectory()?walk(p):[p]});
 const tools=JSON.parse(readFileSync('src/data/tools.json','utf8'));
@@ -46,7 +46,7 @@ for(const d of published){
 for(const dir of folders){const url=folderUrl(dir);assert.ok(existsSync(join(root,url,'index.html')),'Missing folder page '+url);assert.ok(inSitemap(url),'Sitemap omits folder page '+url)}
 for(const rel of sources.filter(r=>!isDoc(r))){
  const built=join(root,'notes',rel);
- if(attachments.has(rel)){assert.ok(existsSync(built),'Missing attachment '+noteUrl(rel)+' (each extension needs src/pages/notes/[...file].<ext>.ts)');assert.ok(readFileSync(built).equals(readFileSync(join(notesDir,rel))),'Attachment differs from source: '+rel);assert.ok(notesIndex.includes('href="'+noteUrl(rel)+'"'),'Notes index (Files) omits attachment '+rel)}
+ if(attachments.has(rel)){assert.ok(existsSync(built),'Missing attachment '+noteUrl(rel)+' (each extension needs src/pages/notes/[...file].<ext>.ts)');assert.ok(readFileSync(built).equals(readFileSync(join(notesDir,rel))),'Attachment differs from source: '+rel);assert.ok(notesIndex.includes('href="'+viewUrl(rel)+'"'),'Notes index (Files) omits attachment '+rel);const dir=dirsOf(rel).pop();if(dir)assert.ok(readFileSync(join(root,folderUrl(dir),'index.html'),'utf8').includes('href="'+noteUrl(rel)+'"'),'Folder page omits raw link to attachment '+rel)}
  else assert.ok(!existsSync(built),'Unpublished attachment was built: '+rel);
 }
 for(const d of drafts){

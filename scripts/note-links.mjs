@@ -6,12 +6,17 @@ import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { folderUrl, noteUrl, resolveTarget } from './note-paths.mjs';
 
+const sourceOf = (base, fileURL) => {
+  const file = fileURL && fileURLToPath(fileURL);
+  const fromRel = file ? relative(base, file) : '..';
+  return fromRel.startsWith('..') || isAbsolute(fromRel) ? null : { file, fromRel };
+};
 export default function noteLinks({ notesDir = 'src/content/notes' } = {}) {
   const base = resolve(notesDir);
   return ({ fileURL }) => {
-    const file = fileURL && fileURLToPath(fileURL);
-    const fromRel = file ? relative(base, file) : '..';
-    if (fromRel.startsWith('..') || isAbsolute(fromRel)) return null;
+    const source = sourceOf(base, fileURL);
+    if (!source) return null;
+    const { file, fromRel } = source;
     const rewrite = (node, ctx) => {
       const target = resolveTarget(fromRel.split(sep).join('/'), node.url);
       if (!target) return;
@@ -22,5 +27,23 @@ export default function noteLinks({ notesDir = 'src/content/notes' } = {}) {
       ctx.setProperty(node, 'url', (statSync(path).isDirectory() ? folderUrl(target.rel) : noteUrl(target.rel)) + target.hash);
     };
     return { name: 'note-links', link: rewrite, definition: rewrite };
+  };
+}
+
+// Sätteri hast plugin: adds data-raw (the raw attachment URL) to each relative image in a note. It runs
+// before Astro's image marker, which passes the attribute through to the optimized <img>, so the image
+// viewer can map a /_astro/ asset back to its attachment. The link plugin has already failed the build
+// for a missing or outside target.
+export function noteImages({ notesDir = 'src/content/notes' } = {}) {
+  const base = resolve(notesDir);
+  return ({ fileURL }) => {
+    const source = sourceOf(base, fileURL);
+    if (!source) return null;
+    const fromRel = source.fromRel.split(sep).join('/');
+    return { name: 'note-images', element: { filter: ['img'], visit(node, ctx) {
+      const src = node.properties?.src;
+      const target = typeof src === 'string' && resolveTarget(fromRel, src);
+      if (target && !target.outside) ctx.setProperty(node, 'data-raw', noteUrl(target.rel));
+    } } };
   };
 }
