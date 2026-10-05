@@ -10,10 +10,8 @@ export const noteId = rel => rel.replace(/\.mdx?$/, '');
 export const folderUrl = dir => dir ? `/knowledge-base/${dir}/` : '/knowledge-base/';
 /** Page URL for a Markdown file, raw URL for an attachment. */
 export const noteUrl = rel => isDoc(rel) ? folderUrl(noteId(rel)) : `/knowledge-base/${rel}`;
-/** Image extensions that have a raw route and open in the folder gallery's viewer. */
+/** Image extensions that have a raw route; note images open in the image viewer. */
 export const isImage = rel => /\.(?:gif|jpg|png|svg|webp)$/.test(rel);
-/** Link in the file tree and folder listings: the folder gallery's deep link for an image in a folder, else noteUrl. */
-export const viewUrl = rel => isImage(rel) && parent(rel) ? `${folderUrl(parent(rel))}#${posix.basename(rel)}` : noteUrl(rel);
 
 export function pathErrors(rel) {
   const errors = rel.split('/').filter(s => !SAFE_SEGMENT.test(s)).map(s => `Unsafe path segment "${s}" in ${rel}: use A-Z a-z 0-9 . _ -`);

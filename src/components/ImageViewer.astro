@@ -1,19 +1,17 @@
 ---
-// One modal viewer for a page's images: the folder gallery's thumbnails ([data-viewer-item]) and the
-// note images in .prose (marked with data-raw by the note-images plugin). Without JavaScript, nothing
-// changes: thumbnails link to the raw files and note images stay plain images.
+// One modal viewer for the note images in .prose (marked with data-raw by the note-images plugin).
+// Without JavaScript, note images stay plain images.
 ---
 <dialog class="viewer" aria-label="Image viewer">
   <div class="viewer-bar"><code class="viewer-name"></code><span class="eyebrow viewer-count" aria-live="polite"></span><button type="button" class="viewer-btn" data-close aria-label="Close viewer">×</button></div>
   <figure class="viewer-stage"><img class="viewer-img" alt="" /><button type="button" class="viewer-btn viewer-prev" aria-label="Previous image">‹</button><button type="button" class="viewer-btn viewer-next" aria-label="Next image">›</button></figure>
-  <div class="viewer-foot"><div class="viewer-used"><span class="eyebrow">Used in</span><span class="viewer-used-links"></span></div><span class="viewer-meta"></span><div class="viewer-actions"><a class="button light viewer-download" download>Download</a><a class="text-link viewer-original" target="_blank" rel="noopener">Open original ↗</a></div></div>
+  <div class="viewer-foot"><div class="viewer-actions"><a class="button light viewer-download" download>Download</a><a class="text-link viewer-original" target="_blank" rel="noopener">Open original ↗</a></div></div>
 </dialog>
 <script>
-  type Item = { src: string; name: string; alt: string; meta?: string; used?: HTMLTemplateElement | null; el: HTMLElement; gallery?: boolean };
+  type Item = { src: string; name: string; alt: string; el: HTMLElement };
   const dialog = document.querySelector<HTMLDialogElement>('dialog.viewer')!;
   const $ = <T extends HTMLElement>(s: string) => dialog.querySelector<T>(s)!;
   const img = $<HTMLImageElement>('.viewer-img'), download = $<HTMLAnchorElement>('.viewer-download'), original = $<HTMLAnchorElement>('.viewer-original');
-  const gallery: Item[] = [...document.querySelectorAll<HTMLAnchorElement>('[data-viewer-item]')].map(a => ({ src: a.getAttribute('href')!, name: a.dataset.name!, alt: a.dataset.name!, meta: a.dataset.meta, used: a.parentElement!.querySelector('template'), el: a, gallery: true }));
   const prose: Item[] = [...document.querySelectorAll<HTMLImageElement>('.prose img[data-raw]')].filter(i => !i.closest('a, button')).map(i => {
     const button = document.createElement('button'), name = i.dataset.raw!.split('/').pop()!;
     button.type = 'button'; button.className = 'viewer-zoom'; button.setAttribute('aria-label', `View larger: ${i.alt || name}`);
@@ -27,12 +25,7 @@
     img.src = it.src; img.alt = it.alt;
     $('.viewer-name').textContent = it.name;
     $('.viewer-count').textContent = `${index + 1} of ${items.length}`;
-    $('.viewer-meta').textContent = it.meta ?? '';
-    const links = it.used ? [...(it.used.content.cloneNode(true) as DocumentFragment).children] : [];
-    $('.viewer-used-links').replaceChildren(...links);
-    $('.viewer-used').hidden = !links.length;
     download.href = original.href = it.src; download.download = it.name;
-    if (it.gallery) history.replaceState(history.state, '', `#${encodeURIComponent(it.name)}`);
   };
   const open = (group: Item[], i: number, from: HTMLElement | null) => {
     items = group; opener = from; active = true;
@@ -40,18 +33,13 @@
     show(i);
     if (!dialog.open) dialog.showModal();
   };
-  for (const group of [gallery, prose]) group.forEach((it, i) => it.el.addEventListener('click', e => {
-    const m = e as MouseEvent;
-    if (m.button || m.metaKey || m.ctrlKey || m.shiftKey || m.altKey) return;
-    e.preventDefault(); open(group, i, it.el);
-  }));
+  prose.forEach((it, i) => it.el.addEventListener('click', e => { e.preventDefault(); open(prose, i, it.el); }));
   $('.viewer-prev').addEventListener('click', () => show(index - 1));
   $('.viewer-next').addEventListener('click', () => show(index + 1));
   // Chromium fires 'close' on the next frame, so every close path, Esc ('cancel') included, cleans up at once.
   const finish = () => {
     if (!active) return;
     active = false;
-    if (items[index].gallery) history.replaceState(history.state, '', location.pathname + location.search);
     (opener ?? items[index].el).focus();
   };
   const close = () => { dialog.close(); finish(); };
@@ -63,12 +51,4 @@
     const step = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
     if (step && items.length > 1) { e.preventDefault(); show(index + step); }
   });
-  const fromHash = () => {
-    let name = location.hash.slice(1);
-    try { name = decodeURIComponent(name); } catch {}
-    const i = gallery.findIndex(it => it.name === name);
-    if (i >= 0) open(gallery, i, null);
-  };
-  fromHash();
-  addEventListener('hashchange', fromHash);
 </script>

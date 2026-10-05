@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { noteId, noteUrl, folderUrl, viewUrl, isImage, pathErrors, urlCollisions, relativeTargets, linkedFiles } from './note-paths.mjs';
+import { noteId, noteUrl, folderUrl, isImage, pathErrors, urlCollisions, relativeTargets, linkedFiles } from './note-paths.mjs';
 import noteLinks, { noteImages } from './note-links.mjs';
 
 test('maps source paths to IDs and URLs, with a README as an ordinary note', () => {
@@ -17,13 +17,9 @@ test('maps source paths to IDs and URLs, with a README as an ordinary note', () 
   assert.equal(folderUrl('observability/images'), '/knowledge-base/observability/images/');
   assert.equal(folderUrl(''), '/knowledge-base/');
 });
-test('links an image to its folder gallery, and other files to their page or raw URL', () => {
+test('treats only extensions with a raw route as images', () => {
   assert.ok(['a.jpg', 'a.png', 'a.gif', 'a.webp', 'a.svg'].every(isImage));
-  assert.ok(!['a.pdf', 'a.mmd', 'a.md', 'a.jpeg'].some(isImage), 'only extensions with a raw route are images');
-  assert.equal(viewUrl('observability/images/02-trace-tree.jpg'), '/knowledge-base/observability/images/#02-trace-tree.jpg');
-  assert.equal(viewUrl('x.svg'), '/knowledge-base/x.svg', 'the knowledge base index has no gallery');
-  assert.equal(viewUrl('observability/files/report.pdf'), '/knowledge-base/observability/files/report.pdf');
-  assert.equal(viewUrl('observability/diagnose-with-cli.md'), '/knowledge-base/observability/diagnose-with-cli/');
+  assert.ok(!['a.pdf', 'a.mmd', 'a.md', 'a.jpeg'].some(isImage));
 });
 test('rejects unsafe segments and reserved root names', () => {
   assert.deepEqual(pathErrors('observability/diagnose-with-cli.md'), []);

@@ -1,9 +1,7 @@
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { getImage } from 'astro:assets';
-import { imageMetadata } from 'astro/assets/utils';
-import { folderUrl, isDoc, isImage, linkedFiles, noteUrl, viewUrl } from '../../scripts/note-paths.mjs';
+import { folderUrl, isDoc, linkedFiles, noteUrl } from '../../scripts/note-paths.mjs';
 
 export type Note = CollectionEntry<'knowledgeBase'>;
 export const entriesDir = 'src/content/knowledge-base';
@@ -29,8 +27,8 @@ export const noteSource = (note: Note) => note.filePath!.slice(entriesDir.length
 export const notePath = (note: Note) => noteUrl(noteSource(note));
 export const noteFolder = (note: Note) => noteSource(note).split('/').slice(0, -1).join('/');
 
-/** url is the page or raw URL; href is the link in trees and listings (an image's gallery deep link). usedIn lists the published docs that link to or embed a file. */
-export type TreeFile = { kind: 'doc' | 'file'; name: string; rel: string; url: string; href: string; note?: Note; usedIn: { name: string; url: string }[] };
+/** url is the page or raw URL. usedIn lists the published docs that link to or embed a file. */
+export type TreeFile = { kind: 'doc' | 'file'; name: string; rel: string; url: string; note?: Note; usedIn: { name: string; url: string }[] };
 export type TreeFolder = { kind: 'folder'; name: string; rel: string; url: string; children: (TreeFolder | TreeFile)[] };
 /** Published Markdown files plus the attachments they link to or embed, as source-named folders. */
 export function noteTree(entries: Note[]): TreeFolder {
@@ -44,7 +42,7 @@ export function noteTree(entries: Note[]): TreeFolder {
   const add = (rel: string, kind: TreeFile['kind'], note?: Note) => {
     const dir = rel.includes('/') ? folder(rel.slice(0, rel.lastIndexOf('/'))) : root;
     let file = dir.children.find((c): c is TreeFile => c.kind !== 'folder' && c.rel === rel);
-    if (!file) dir.children.push(file = { kind, name: rel.split('/').pop()!, rel, url: noteUrl(rel), href: viewUrl(rel), note, usedIn: [] });
+    if (!file) dir.children.push(file = { kind, name: rel.split('/').pop()!, rel, url: noteUrl(rel), note, usedIn: [] });
     return { dir, file };
   };
   for (const note of entries) {
@@ -59,19 +57,3 @@ export function noteTree(entries: Note[]): TreeFolder {
 }
 export const treeFolders = (dir: TreeFolder): TreeFolder[] => [dir, ...dir.children.flatMap(c => c.kind === 'folder' ? treeFolders(c) : [])];
 export const treeAttachments = (dir: TreeFolder): TreeFile[] => treeFolders(dir).flatMap(d => d.children.filter((c): c is TreeFile => c.kind === 'file'));
-
-export type GalleryImage = { file: TreeFile; meta: string; format: string; thumb: { src: string; width?: number; height?: number } };
-const rasters = import.meta.glob<{ default: ImageMetadata }>('/src/content/knowledge-base/**/*.{gif,jpg,png,webp}');
-const fileSize = (bytes: number) => bytes < 1024 ? `${bytes} B` : bytes < 1024 * 1024 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-/** The published images in a folder, with build-time dimensions, size, and an optimized thumbnail (the raw SVG for an SVG). */
-export async function galleryImages(dir: TreeFolder): Promise<GalleryImage[]> {
-  const files = dir.children.filter((c): c is TreeFile => c.kind === 'file' && isImage(c.rel));
-  return Promise.all(files.map(async file => {
-    const data = readFileSync(join(entriesDir, file.rel));
-    const { width, height, format } = await imageMetadata(data, file.rel).catch(() => ({ width: undefined, height: undefined, format: file.rel.split('.').pop()! }));
-    const meta = [width && height ? `${width}×${height}` : 'SVG', fileSize(data.length)].join(' · ');
-    const load = rasters[`/${entriesDir}/${file.rel}`];
-    const thumb = load ? await getImage({ src: (await load()).default, width: Math.min(480, width ?? 480), format: 'webp' }) : null;
-    return { file, meta, format: format.toUpperCase(), thumb: thumb ? { src: thumb.src, width: Number(thumb.attributes.width), height: Number(thumb.attributes.height) } : { src: file.url, width, height } };
-  }));
-}
