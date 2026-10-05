@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/doruksahin/agent-workflows-site/compare/v0.2.0...v0.3.0) (2026-10-05)
+
+
+### Features
+
+* **knowledge-base:** file explorer drawer, grouped rows, and rename notes to knowledge base ([#5](https://github.com/doruksahin/agent-workflows-site/issues/5)) ([0fc1f12](https://github.com/doruksahin/agent-workflows-site/commit/0fc1f125658d1fd444b525031c71765f769757ba))
+
 ## [0.2.0](https://github.com/doruksahin/agent-workflows-site/compare/v0.1.0...v0.2.0) (2026-10-05)
 
 
