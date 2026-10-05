@@ -39,12 +39,14 @@ export function urlCollisions(rels) {
 }
 
 const isRelative = t => !!t && !/^(?:[a-z][a-z0-9+.-]*:|[#/?])/i.test(t);
-/** Relative link, image, definition, and src/href targets in a Markdown body, outside code. */
+/** Relative Markdown link, image, and definition targets in a body, outside code. Raw HTML src/href is
+ * not rewritten, so it is not a reference here; check-site rejects it in the built page. A [^x]: line
+ * is a GFM footnote definition, not a link definition. */
 export function relativeTargets(body) {
   const text = body.replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:^ {0,3}\1[`~]*[ \t]*$|(?![\s\S]))/gm, '').replace(/(`+)[\s\S]*?\1/g, '');
   const found = [];
-  for (const m of text.matchAll(/!?\[[^\]]*\]\(\s*(<[^>]*>|[^\s)]+)|^ {0,3}\[[^\]]+\]:\s*(<[^>]*>|\S+)|\b(?:src|href)=["']([^"']+)["']/gm)) {
-    const t = (m[1] ?? m[2] ?? m[3]).replace(/^<|>$/g, '');
+  for (const m of text.matchAll(/!?\[[^\]]*\]\(\s*(<[^>]*>|[^\s)]+)|^ {0,3}\[(?!\^)[^\]]+\]:\s*(<[^>]*>|\S+)/gm)) {
+    const t = (m[1] ?? m[2]).replace(/^<|>$/g, '');
     if (isRelative(t)) found.push(t);
   }
   return found;

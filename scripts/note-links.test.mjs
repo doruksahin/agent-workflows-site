@@ -39,11 +39,14 @@ test('reports sources that share a URL', () => {
   assert.match(urlCollisions(['x.md', 'x/y.md']).join(), /\/notes\/x\/ .*x.md.*x\//);
   assert.match(urlCollisions(['a/x.jpg', 'a/x.jpg.md']).join(), /\/notes\/a\/x.jpg/);
 });
-test('finds relative link, image, definition, and src targets outside code', () => {
-  const body = '[a](b.md#s) ![i](./images/x.jpg "t") [ext](https://e.com) [h](#top) [m](mailto:a@b.c)\n[ref]: ../c.md\n<img src="./y.png" />\n`[no](code.md)`\n```\n[no](fenced.md)\n```\n[abs](/notes/)';
-  assert.deepEqual(relativeTargets(body), ['b.md#s', './images/x.jpg', '../c.md', './y.png']);
-  assert.deepEqual(linkedFiles('o/README.md', body), ['o/b.md', 'o/images/x.jpg', 'c.md', 'o/y.png']);
+test('finds relative Markdown link, image, and definition targets outside code; not raw HTML', () => {
+  const body = '[a](b.md#s) ![i](./images/x.jpg "t") [ext](https://e.com) [h](#top) [m](mailto:a@b.c)\n[ref]: ../c.md\n<img src="./y.png" /> <a href="z.md">z</a>\n`[no](code.md)`\n```\n[no](fenced.md)\n```\n[abs](/notes/)';
+  assert.deepEqual(relativeTargets(body), ['b.md#s', './images/x.jpg', '../c.md'], 'raw HTML is not rewritten, so it is not a publishing reference; check-site rejects it in the built page');
+  assert.deepEqual(linkedFiles('o/README.md', body), ['o/b.md', 'o/images/x.jpg', 'c.md']);
   assert.deepEqual(linkedFiles('README.md', '[x](../../outside.md)'), []);
+});
+test('does not read GFM footnote definitions as link definitions', () => {
+  assert.deepEqual(relativeTargets('Text.[^1]\n\n[^1]: See the notes.\n   [^note]: Indented.\n[ref]: x.md'), ['x.md']);
 });
 
 const fixture = () => {

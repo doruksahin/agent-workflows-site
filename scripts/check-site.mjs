@@ -66,10 +66,17 @@ const referenced=a=>refs.includes('/_astro/'+a);
 // Astro also emits an unreferenced original beside each transformed SVG: x.HASH.svg next to x.HASH_HASH2.svg.
 const transformedSibling=a=>{const ext=a.match(/\.[^.]+$/)?.[0]??'',stem=a.slice(0,a.length-ext.length);return assets.some(b=>b!==a&&b.startsWith(stem+'_')&&b.endsWith(ext)&&referenced(b))};
 for(const a of assets) assert.ok(referenced(a)||transformedSibling(a),'Unreferenced build asset (draft attachment?) '+a);
+const notesRoot=join(root,'notes')+sep;
 for(const file of files){
  const html=readFileSync(file,'utf8');
  assert.ok(html.includes('<title>'),'Missing page title: '+file);
  assert.ok(html.includes('name="description"'),'Missing description: '+file);
+ assert.ok(!/<summary\b(?:(?!<\/summary>)[\s\S])*?<(?:a|button|input|select|textarea)\b/i.test(html),'Interactive element inside <summary> in '+file);
+ // Raw HTML in a note passes through unchanged, in any quoting, so its relative URLs break on the page.
+ if(file.startsWith(notesRoot)) for(const m of html.matchAll(/\s(?:href|src)=(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/gi)){
+  const href=(m[1]??m[2]??m[3]).replaceAll('&amp;','&');
+  assert.ok(!href||/^(?:[/#]|[a-z][a-z0-9+.-]*:)/i.test(href),'Relative URL '+href+' in '+file+': use Markdown link or image syntax in notes');
+ }
  for(const m of html.matchAll(/(?:href|src)="([^"]+)"/g)){
   const href=m[1].replaceAll('&amp;','&');
   if(!href.startsWith('/')||href.startsWith('//')) continue;
